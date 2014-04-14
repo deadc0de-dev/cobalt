@@ -1,12 +1,9 @@
 package dev.deadc0de.cobalt;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
-import dev.deadc0de.cobalt.geometry.Point;
-import dev.deadc0de.cobalt.grid.ArrayGrid;
-import dev.deadc0de.cobalt.grid.Grid;
+import dev.deadc0de.cobalt.rendering.ImageRenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
 import dev.deadc0de.cobalt.rendering.StackRenderer;
-import dev.deadc0de.cobalt.rendering.TiledRenderingLayer;
 import dev.deadc0de.cobalt.rendering.View;
 import java.util.Arrays;
 import java.util.List;
@@ -27,7 +24,6 @@ public class Main extends Application {
     private static final int WIDTH = 10;
     private static final int HEIGHT = 9;
     private static final int TILE_SIZE = 16;
-    private static final int ZONE_SIZE = 50;
 
     public static void main(String... args) {
         Application.launch(args);
@@ -51,15 +47,8 @@ public class Main extends Application {
     }
 
     private List<RenderingLayer> layers() {
-        final Image worldTiles = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/world.png"));
-        final Point grassPosition = new Point(16 * TILE_SIZE, 0 * TILE_SIZE);
-        final Grid<Point> map = new ArrayGrid<>(ZONE_SIZE, ZONE_SIZE);
-        for (int r = 0; r < map.rows(); r++) {
-            for (int c = 0; c < map.columns(); c++) {
-                map.setAt(r, c, grassPosition);
-            }
-        }
-        return Arrays.asList(new TiledRenderingLayer(worldTiles, map, TILE_SIZE));
+        final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png"));
+        return Arrays.asList(new ImageRenderingLayer(background));
     }
 
     private void startRendering(Runnable renderer) {
