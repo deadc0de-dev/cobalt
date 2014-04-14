@@ -1,25 +1,33 @@
 package dev.deadc0de.cobalt;
 
+import dev.deadc0de.cobalt.geometry.Dimension;
+import dev.deadc0de.cobalt.geometry.Point;
+import dev.deadc0de.cobalt.grid.ArrayGrid;
+import dev.deadc0de.cobalt.grid.Grid;
+import dev.deadc0de.cobalt.rendering.RenderingLayer;
+import dev.deadc0de.cobalt.rendering.StackRenderer;
+import dev.deadc0de.cobalt.rendering.TiledRenderingLayer;
+import dev.deadc0de.cobalt.rendering.View;
+import java.util.Arrays;
+import java.util.List;
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.BorderPane;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.CycleMethod;
-import javafx.scene.paint.LinearGradient;
-import javafx.scene.paint.Paint;
-import javafx.scene.paint.Stop;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 public class Main extends Application {
 
-    private static final int WIDTH = 300;
-    private static final int HEIGHT = 200;
+    private static final int WIDTH = 10;
+    private static final int HEIGHT = 9;
+    private static final int TILE_SIZE = 16;
+    private static final int ZONE_SIZE = 50;
 
     public static void main(String... args) {
         Application.launch(args);
@@ -27,34 +35,36 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        final Scene scene = new Scene(root(), WIDTH, HEIGHT, background());
+        final Scene scene = new Scene(root());
         stage.setScene(scene);
         stage.setTitle("Cobalt");
         stage.show();
     }
 
     private Parent root() {
-        final Text group = label("deadc0de.dev");
-        final AnchorPane groupPane = new AnchorPane(group);
-        AnchorPane.setBottomAnchor(group, 0D);
-        AnchorPane.setRightAnchor(group, 0D);
-        final Text message = label("Not implemented yet...");
-        final BorderPane messagePane = new BorderPane(message);
-        return new StackPane(groupPane, messagePane);
+        final Dimension renderingArea = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
+        final Canvas canvas = new Canvas(renderingArea.width, renderingArea.height);
+        final View view = new View(renderingArea);
+        final StackRenderer stackRenderer = new StackRenderer(layers(), canvas.getGraphicsContext2D(), view);
+        startRendering(stackRenderer::render);
+        return new StackPane(canvas);
     }
 
-    private Text label(String text) {
-        final Text formattedText = new Text(text);
-        formattedText.setFont(Font.font("Verdana", FontWeight.BOLD, 18));
-        formattedText.setFill(Color.WHITE);
-        formattedText.setStroke(Color.web("#0047AB"));
-        return formattedText;
+    private List<RenderingLayer> layers() {
+        final Image worldTiles = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/world.png"));
+        final Point grassPosition = new Point(16 * TILE_SIZE, 0 * TILE_SIZE);
+        final Grid<Point> map = new ArrayGrid<>(ZONE_SIZE, ZONE_SIZE);
+        for (int r = 0; r < map.rows(); r++) {
+            for (int c = 0; c < map.columns(); c++) {
+                map.setAt(r, c, grassPosition);
+            }
+        }
+        return Arrays.asList(new TiledRenderingLayer(worldTiles, map, TILE_SIZE));
     }
 
-    private Paint background() {
-        return new LinearGradient(0, 0, 0, 1, true, CycleMethod.NO_CYCLE, new Stop[]{
-            new Stop(0, Color.web("#284493")),
-            new Stop(0.5, Color.web("#B0C6DA")),
-            new Stop(1, Color.web("#49559A"))});
+    private void startRendering(Runnable renderer) {
+        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> renderer.run()));
+        timeline.setCycleCount(Animation.INDEFINITE);
+        timeline.play();
     }
 }
