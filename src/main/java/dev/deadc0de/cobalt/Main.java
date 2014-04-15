@@ -1,12 +1,17 @@
 package dev.deadc0de.cobalt;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
+import dev.deadc0de.cobalt.geometry.Point;
+import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.rendering.ImageRenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
+import dev.deadc0de.cobalt.rendering.SparseTilesRenderingLayer;
 import dev.deadc0de.cobalt.rendering.StackRenderer;
 import dev.deadc0de.cobalt.rendering.View;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -48,7 +53,15 @@ public class Main extends Application {
 
     private List<RenderingLayer> layers() {
         final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png"));
-        return Arrays.asList(new ImageRenderingLayer(background));
+        final Image sprites = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/world.png"));
+        return Arrays.asList(new ImageRenderingLayer(background), new SparseTilesRenderingLayer(sprites, elements()));
+    }
+
+    private Map<Region, Point> elements() {
+        final Region signboard = new Region(new Point(208, 64), new Dimension(TILE_SIZE, TILE_SIZE));
+        final Map<Region, Point> elements = new HashMap<>();
+        elements.put(signboard, new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
+        return elements;
     }
 
     private void startRendering(Runnable renderer) {
