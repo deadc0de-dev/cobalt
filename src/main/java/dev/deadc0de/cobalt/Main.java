@@ -2,12 +2,14 @@ package dev.deadc0de.cobalt;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
-import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.rendering.ImageRenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
 import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
 import dev.deadc0de.cobalt.rendering.StackRenderer;
 import dev.deadc0de.cobalt.rendering.View;
+import dev.deadc0de.cobalt.world.Sprite;
+import dev.deadc0de.cobalt.world.SpritesEnvironment;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +32,8 @@ public class Main extends Application {
     private static final int HEIGHT = 9;
     private static final int TILE_SIZE = 16;
 
+    private final List<Runnable> updateHandlers = new ArrayList<>();
+
     public static void main(String... args) {
         Application.launch(args);
     }
@@ -39,6 +43,7 @@ public class Main extends Application {
         final Scene scene = new Scene(root());
         stage.setScene(scene);
         stage.setTitle("Cobalt");
+        startRendering();
         stage.show();
     }
 
@@ -47,30 +52,31 @@ public class Main extends Application {
         final Canvas canvas = new Canvas(renderingArea.width, renderingArea.height);
         final View view = new View(renderingArea);
         final StackRenderer stackRenderer = new StackRenderer(layers(), canvas.getGraphicsContext2D(), view);
-        startRendering(stackRenderer::render);
+        updateHandlers.add(stackRenderer::render);
         return new StackPane(canvas);
     }
 
     private List<RenderingLayer> layers() {
-        final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png"));
-        final Image sprites = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/world.png"));
-        return Arrays.asList(new ImageRenderingLayer(background), new SpritesRenderingLayer(sprites, sprites(), elements().entrySet()::stream));
+        final RenderingLayer background = new ImageRenderingLayer(new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png")));
+        final SpritesEnvironment<String> environment = environment();
+        final RenderingLayer spritesLayer = new SpritesRenderingLayer<>(Sprites.SPRITES, Sprites.spritesRegions(), environment::getStatesAndPositions);
+        return Arrays.asList(background, spritesLayer);
     }
 
-    private Map<String, Region> sprites() {
-        final Map<String, Region> sprites = new HashMap<>();
-        sprites.put("signboard", new Region(new Point(208, 64), new Dimension(TILE_SIZE, TILE_SIZE)));
+    private SpritesEnvironment<String> environment() {
+        final SpritesEnvironment<String> environment = new SpritesEnvironment<>(sprites());
+        updateHandlers.add(environment::update);
+        return environment;
+    }
+
+    private Map<Sprite<String>, Point> sprites() {
+        final Map<Sprite<String>, Point> sprites = new HashMap<>();
+        sprites.put(Sprites.signboard(), new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
         return sprites;
     }
 
-    private Map<String, Point> elements() {
-        final Map<String, Point> elements = new HashMap<>();
-        elements.put("signboard", new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
-        return elements;
-    }
-
-    private void startRendering(Runnable renderer) {
-        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(250), event -> renderer.run()));
+    private void startRendering() {
+        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(250), event -> updateHandlers.forEach(Runnable::run)));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }

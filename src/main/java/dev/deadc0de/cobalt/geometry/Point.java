@@ -9,4 +9,8 @@ public class Point {
         this.x = x;
         this.y = y;
     }
+
+    public Point add(Point point) {
+        return new Point(x + point.x, y + point.y);
+    }
 }
