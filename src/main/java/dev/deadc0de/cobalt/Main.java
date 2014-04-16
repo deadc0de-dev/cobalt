@@ -5,7 +5,7 @@ import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.rendering.ImageRenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
-import dev.deadc0de.cobalt.rendering.SparseTilesRenderingLayer;
+import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
 import dev.deadc0de.cobalt.rendering.StackRenderer;
 import dev.deadc0de.cobalt.rendering.View;
 import java.util.Arrays;
@@ -54,18 +54,23 @@ public class Main extends Application {
     private List<RenderingLayer> layers() {
         final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png"));
         final Image sprites = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/world.png"));
-        return Arrays.asList(new ImageRenderingLayer(background), new SparseTilesRenderingLayer(sprites, elements()));
+        return Arrays.asList(new ImageRenderingLayer(background), new SpritesRenderingLayer(sprites, sprites(), elements().entrySet()::stream));
     }
 
-    private Map<Region, Point> elements() {
-        final Region signboard = new Region(new Point(208, 64), new Dimension(TILE_SIZE, TILE_SIZE));
-        final Map<Region, Point> elements = new HashMap<>();
-        elements.put(signboard, new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
+    private Map<String, Region> sprites() {
+        final Map<String, Region> sprites = new HashMap<>();
+        sprites.put("signboard", new Region(new Point(208, 64), new Dimension(TILE_SIZE, TILE_SIZE)));
+        return sprites;
+    }
+
+    private Map<String, Point> elements() {
+        final Map<String, Point> elements = new HashMap<>();
+        elements.put("signboard", new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
         return elements;
     }
 
     private void startRendering(Runnable renderer) {
-        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), event -> renderer.run()));
+        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(250), event -> renderer.run()));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }
