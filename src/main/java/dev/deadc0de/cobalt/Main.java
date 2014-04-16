@@ -72,6 +72,7 @@ public class Main extends Application {
     private Map<Sprite<String>, Point> sprites() {
         final Map<Sprite<String>, Point> sprites = new HashMap<>();
         sprites.put(Sprites.signboard(), new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
+        sprites.put(Sprites.flowers(), new Point(1 * TILE_SIZE, 6 * TILE_SIZE));
         return sprites;
     }
 
