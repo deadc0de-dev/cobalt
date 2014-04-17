@@ -2,6 +2,7 @@ package dev.deadc0de.cobalt.rendering;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
+import dev.deadc0de.cobalt.geometry.Region;
 
 public class View {
 
@@ -15,5 +16,9 @@ public class View {
 
     public Point position() {
         return new Point(x, y);
+    }
+
+    public Region region() {
+        return new Region(position(), size);
     }
 }

@@ -2,10 +2,9 @@ package dev.deadc0de.cobalt;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
-import dev.deadc0de.cobalt.rendering.ImageRenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
+import dev.deadc0de.cobalt.rendering.RenderingPane;
 import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
-import dev.deadc0de.cobalt.rendering.StackRenderer;
 import dev.deadc0de.cobalt.rendering.View;
 import dev.deadc0de.cobalt.world.Sprite;
 import dev.deadc0de.cobalt.world.SpritesEnvironment;
@@ -20,9 +19,7 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -58,20 +55,19 @@ public class Main extends Application {
 
     private Parent root() {
         final Dimension renderingArea = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
-        final Canvas canvas = new Canvas(renderingArea.width, renderingArea.height);
         final View view = new View(renderingArea);
-        final StackRenderer stackRenderer = new StackRenderer(layers(), canvas.getGraphicsContext2D(), view);
-        updateHandlers.add(stackRenderer::render);
-        return new StackPane(canvas);
+        final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png"));
+        final RenderingPane renderingPane = new RenderingPane(background, layers()::stream, view);
+        updateHandlers.add(renderingPane::update);
+        return renderingPane;
     }
 
     private List<RenderingLayer> layers() {
-        final RenderingLayer background = new ImageRenderingLayer(new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png")));
         final SpritesEnvironment<String> environment = environment();
         final RenderingLayer spritesLayer = new SpritesRenderingLayer<>(Sprites.SPRITES, Sprites.spritesRegions(), environment::getStatesAndPositions);
         final SpritesEnvironment<String> mainCharacterEnvironment = mainCharacterEnvironment();
         final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer<>(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacterEnvironment::getStatesAndPositions);
-        return Arrays.asList(background, spritesLayer, mainCharacterLayer);
+        return Arrays.asList(spritesLayer, mainCharacterLayer);
     }
 
     private SpritesEnvironment<String> environment() {
