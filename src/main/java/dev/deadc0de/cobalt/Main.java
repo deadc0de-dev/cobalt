@@ -32,7 +32,14 @@ public class Main extends Application {
     private static final int HEIGHT = 9;
     private static final int TILE_SIZE = 16;
 
-    private final List<Runnable> updateHandlers = new ArrayList<>();
+    private final List<Runnable> updateHandlers;
+    private final KeyboardInput input;
+
+    public Main() {
+        updateHandlers = new ArrayList<>();
+        input = new KeyboardInput();
+        updateHandlers.add(this.input::update);
+    }
 
     public static void main(String... args) {
         Application.launch(args);
@@ -41,6 +48,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         final Scene scene = new Scene(root());
+        scene.setOnKeyPressed(input::keyDown);
+        scene.setOnKeyReleased(input::keyUp);
         stage.setScene(scene);
         stage.setTitle("Cobalt");
         startRendering();
@@ -60,7 +69,9 @@ public class Main extends Application {
         final RenderingLayer background = new ImageRenderingLayer(new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png")));
         final SpritesEnvironment<String> environment = environment();
         final RenderingLayer spritesLayer = new SpritesRenderingLayer<>(Sprites.SPRITES, Sprites.spritesRegions(), environment::getStatesAndPositions);
-        return Arrays.asList(background, spritesLayer);
+        final SpritesEnvironment<String> mainCharacterEnvironment = mainCharacterEnvironment();
+        final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer<>(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacterEnvironment::getStatesAndPositions);
+        return Arrays.asList(background, spritesLayer, mainCharacterLayer);
     }
 
     private SpritesEnvironment<String> environment() {
@@ -74,6 +85,14 @@ public class Main extends Application {
         sprites.put(Sprites.signboard(), new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
         sprites.put(Sprites.flowers(), new Point(1 * TILE_SIZE, 6 * TILE_SIZE));
         return sprites;
+    }
+
+    private SpritesEnvironment<String> mainCharacterEnvironment() {
+        final Map<Sprite<String>, Point> sprites = new HashMap<>();
+        sprites.put(MainCharacter.mainCharacter(input), new Point(2 * TILE_SIZE, 6 * TILE_SIZE - 4));
+        final SpritesEnvironment<String> environment = new SpritesEnvironment<>(sprites);
+        updateHandlers.add(environment::update);
+        return environment;
     }
 
     private void startRendering() {
