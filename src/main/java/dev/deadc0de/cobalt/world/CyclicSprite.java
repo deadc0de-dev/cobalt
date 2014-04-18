@@ -1,16 +1,15 @@
 package dev.deadc0de.cobalt.world;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class CyclicSprite<S> implements Sprite<S> {
 
-    private final List<S> states;
+    private final Iterable<S> states;
     private Iterator<S> statesIterator;
     private S state;
 
-    public CyclicSprite(List<S> states) {
-        if (states.isEmpty()) {
+    public CyclicSprite(Iterable<S> states) {
+        if (!states.iterator().hasNext()) {
             throw new IllegalArgumentException("cannot cycle over an empty list of states");
         }
         this.states = states;

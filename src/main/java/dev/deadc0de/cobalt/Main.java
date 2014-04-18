@@ -92,7 +92,7 @@ public class Main extends Application {
     }
 
     private void startRendering() {
-        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(250), event -> updateHandlers.forEach(Runnable::run)));
+        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(40), event -> updateHandlers.forEach(Runnable::run)));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }

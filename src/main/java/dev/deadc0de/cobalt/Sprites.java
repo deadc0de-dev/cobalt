@@ -6,7 +6,6 @@ import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.world.CyclicSprite;
 import dev.deadc0de.cobalt.world.ImmutableSprite;
 import dev.deadc0de.cobalt.world.Sprite;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.image.Image;
@@ -30,10 +29,11 @@ public class Sprites {
     }
 
     public static Sprite<String> flowers() {
-        return new CyclicSprite<>(Arrays.asList(
-                "flowers1", "flowers1",
-                "flowers2", "flowers2",
-                "flowers3", "flowers3",
-                "flowers4", "flowers4"));
+        return new CyclicSprite<>(new AnimationBuilder<String>()
+                .add(10, "flowers1")
+                .add(10, "flowers2")
+                .add(10, "flowers3")
+                .add(10, "flowers4")
+                .animation());
     }
 }
