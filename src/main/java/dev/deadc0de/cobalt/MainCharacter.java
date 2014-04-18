@@ -3,7 +3,6 @@ package dev.deadc0de.cobalt;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.world.MainCharacterSprite;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.image.Image;
@@ -27,9 +26,5 @@ public class MainCharacter {
         sprites.put("character-right-left", new Region(new Point(0, 32), new Dimension(16, 16)));
         sprites.put("character-right-right", new Region(new Point(32, 32), new Dimension(16, 16)));
         return sprites;
-    }
-
-    public static MainCharacterSprite mainCharacter() {
-        return new MainCharacterSprite();
     }
 }

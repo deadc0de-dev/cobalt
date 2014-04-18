@@ -6,43 +6,43 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class CyclicSpriteTest {
+public class CyclicStateElementTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void constructorWithEmptyListThrows() {
-        final CyclicSprite<?> unused = new CyclicSprite<>(Collections.emptyList());
+        final CyclicStateElement unused = new CyclicStateElement(Collections.emptyList());
     }
 
     @Test
     public void spriteIsInitializedWithTheFirstState() {
-        final Object firstState = new Object();
-        final CyclicSprite<?> sprite = new CyclicSprite<>(Arrays.asList(firstState));
+        final String firstState = "state";
+        final CyclicStateElement sprite = new CyclicStateElement(Arrays.asList(firstState));
         Assert.assertEquals(firstState, sprite.state());
     }
 
     @Test
     public void spriteWithOneStateCyclesOverIt() {
-        final Object state = new Object();
-        final CyclicSprite<?> sprite = new CyclicSprite<>(Arrays.asList(state));
+        final String state = "state";
+        final CyclicStateElement sprite = new CyclicStateElement(Arrays.asList(state));
         sprite.update();
         Assert.assertEquals(state, sprite.state());
     }
 
     @Test
     public void spriteStateIsTheNextOneAfterAnUpdate() {
-        final Object firstState = new Object();
-        final Object secondState = new Object();
-        final CyclicSprite<?> sprite = new CyclicSprite<>(Arrays.asList(firstState, secondState));
+        final String firstState = "first-state";
+        final String secondState = "second-state";
+        final CyclicStateElement sprite = new CyclicStateElement(Arrays.asList(firstState, secondState));
         sprite.update();
         Assert.assertEquals(secondState, sprite.state());
     }
 
     @Test
     public void spriteStateIsTheFirstOneAfterAnEntireCycle() {
-        final Object firstState = new Object();
-        final Object secondState = new Object();
-        final List<Object> states = Arrays.asList(firstState, secondState);
-        final CyclicSprite<?> sprite = new CyclicSprite<>(states);
+        final String firstState = "first-state";
+        final String secondState = "second-state";
+        final List<String> states = Arrays.asList(firstState, secondState);
+        final CyclicStateElement sprite = new CyclicStateElement(states);
         states.forEach(state -> sprite.update());
         Assert.assertEquals(firstState, sprite.state());
     }

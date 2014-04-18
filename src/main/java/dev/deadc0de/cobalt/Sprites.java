@@ -3,8 +3,7 @@ package dev.deadc0de.cobalt;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.world.CyclicSprite;
-import dev.deadc0de.cobalt.world.Sprite;
+import dev.deadc0de.cobalt.world.CyclicStateElement;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.image.Image;
@@ -28,8 +27,8 @@ public class Sprites {
         return sprites;
     }
 
-    public static Sprite<String> flower() {
-        return new CyclicSprite<>(new AnimationBuilder<String>()
+    public static CyclicStateElement flower() {
+        return new CyclicStateElement(new AnimationBuilder()
                 .add(10, "flower-1")
                 .add(10, "flower-2")
                 .add(10, "flower-3")
@@ -37,8 +36,8 @@ public class Sprites {
                 .animation());
     }
 
-    public static Sprite<String> sea() {
-        return new CyclicSprite<>(new AnimationBuilder<String>()
+    public static CyclicStateElement sea() {
+        return new CyclicStateElement(new AnimationBuilder()
                 .add(10, "sea-1")
                 .add(10, "sea-2")
                 .add(10, "sea-3")

@@ -2,13 +2,13 @@ package dev.deadc0de.cobalt.world;
 
 import java.util.Iterator;
 
-public class CyclicSprite<S> implements Sprite<S> {
+public class CyclicStateElement {
 
-    private final Iterable<S> states;
-    private Iterator<S> statesIterator;
-    private S state;
+    private final Iterable<String> states;
+    private Iterator<String> statesIterator;
+    private String state;
 
-    public CyclicSprite(Iterable<S> states) {
+    public CyclicStateElement(Iterable<String> states) {
         if (!states.iterator().hasNext()) {
             throw new IllegalArgumentException("cannot cycle over an empty list of states");
         }
@@ -17,12 +17,10 @@ public class CyclicSprite<S> implements Sprite<S> {
         this.state = statesIterator.next();
     }
 
-    @Override
-    public S state() {
+    public String state() {
         return state;
     }
 
-    @Override
     public void update() {
         if (!statesIterator.hasNext()) {
             statesIterator = states.iterator();

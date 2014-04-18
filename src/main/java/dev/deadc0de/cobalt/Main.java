@@ -2,18 +2,23 @@ package dev.deadc0de.cobalt;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
+import dev.deadc0de.cobalt.rendering.MovableSprite;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingPane;
+import dev.deadc0de.cobalt.rendering.Sprite;
 import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
+import dev.deadc0de.cobalt.rendering.StationarySprite;
 import dev.deadc0de.cobalt.rendering.View;
-import dev.deadc0de.cobalt.world.MainCharacterEnviroment;
-import dev.deadc0de.cobalt.world.Sprite;
-import dev.deadc0de.cobalt.world.SpritesEnvironment;
+import dev.deadc0de.cobalt.world.CyclicStateElement;
+import dev.deadc0de.cobalt.world.MainCharacterManager;
+import dev.deadc0de.cobalt.world.MainCharacterElement;
+import dev.deadc0de.cobalt.world.Zone;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -65,65 +70,46 @@ public class Main extends Application {
     }
 
     private List<RenderingLayer> layers() {
-        final SpritesEnvironment<String> environment = environment();
-        final RenderingLayer spritesLayer = new SpritesRenderingLayer<>(Sprites.SPRITES, Sprites.spritesRegions(), environment::getStatesAndPositions);
-        final MainCharacterEnviroment mainCharacterEnvironment = mainCharacterEnvironment();
-        final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer<>(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacterEnvironment::getStateAndPosition);
+        final Zone zone = palletTown();
+        final RenderingLayer spritesLayer = new SpritesRenderingLayer(Sprites.SPRITES, Sprites.spritesRegions(), zone.sprites);
+        final MainCharacterManager mainCharacterEnvironment = mainCharacterEnvironment();
+        final List<Sprite> mainCharacter = Collections.singletonList(new MovableSprite(mainCharacterEnvironment::state, mainCharacterEnvironment::position));
+        final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacter::stream);
         return Arrays.asList(spritesLayer, mainCharacterLayer);
     }
 
-    private SpritesEnvironment<String> environment() {
-        final SpritesEnvironment<String> environment = new SpritesEnvironment<>(sprites());
-        updateHandlers.add(environment::update);
-        return environment;
+    private Zone palletTown() {
+        final CyclicStateElement flower = Sprites.flower();
+        final List<Point> flowersPositions = new ArrayList<>();
+        for (int c = 7; c <= 10; c++) {
+            flowersPositions.add(new Point(c * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
+            flowersPositions.add(new Point(c * TILE_SIZE, 14 * TILE_SIZE));
+        }
+        for (int c = 13; c <= 16; c++) {
+            flowersPositions.add(new Point(c * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
+            flowersPositions.add(new Point(c * TILE_SIZE, 18 * TILE_SIZE));
+        }
+        final CyclicStateElement sea = Sprites.sea();
+        final List<Point> seaPositions = new ArrayList<>();
+        for (int r = 18; r <= 24; r++) {
+            for (int c = 8; c <= 10; c++) {
+                seaPositions.add(new Point(c * TILE_SIZE - 8, r * TILE_SIZE - 8));
+            }
+        }
+        final List<Sprite> sprites = Stream.of(
+                flowersPositions.stream().map(position -> new StationarySprite(flower::state, position)),
+                seaPositions.stream().map(position -> new StationarySprite(sea::state, position)))
+                .reduce(Stream.empty(), Stream::concat).collect(Collectors.toList());
+        final List<Runnable> updatables = Arrays.asList(flower::update, sea::update);
+        final Zone palletTown = new Zone("pallet-town", sprites::stream, updatables::stream);
+        updateHandlers.add(() -> palletTown.updatables.get().forEach(Runnable::run));
+        return palletTown;
     }
 
-    private Map<Sprite<String>, Point> sprites() {
-        final Map<Sprite<String>, Point> sprites = new HashMap<>();
-        sprites.put(Sprites.flower(), new Point(7 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(7 * TILE_SIZE, 14 * TILE_SIZE));
-        sprites.put(Sprites.flower(), new Point(8 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(8 * TILE_SIZE, 14 * TILE_SIZE));
-        sprites.put(Sprites.flower(), new Point(9 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(9 * TILE_SIZE, 14 * TILE_SIZE));
-        sprites.put(Sprites.flower(), new Point(10 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(10 * TILE_SIZE, 14 * TILE_SIZE));
-        sprites.put(Sprites.flower(), new Point(13 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(13 * TILE_SIZE, 18 * TILE_SIZE));
-        sprites.put(Sprites.flower(), new Point(14 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(14 * TILE_SIZE, 18 * TILE_SIZE));
-        sprites.put(Sprites.flower(), new Point(15 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(15 * TILE_SIZE, 18 * TILE_SIZE));
-        sprites.put(Sprites.flower(), new Point(16 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
-        sprites.put(Sprites.flower(), new Point(16 * TILE_SIZE, 18 * TILE_SIZE));
-        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 18 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 18 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 18 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 19 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 19 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 19 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 20 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 20 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 20 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 21 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 21 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 21 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 22 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 22 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 22 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 23 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 23 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 23 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 24 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 24 * TILE_SIZE - 8));
-        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 24 * TILE_SIZE - 8));
-        return sprites;
-    }
-
-    private MainCharacterEnviroment mainCharacterEnvironment() {
+    private MainCharacterManager mainCharacterEnvironment() {
         final Point initialPosition = new Point(8 * TILE_SIZE, 9 * TILE_SIZE - 4);
         final Point viewRelativePosition = new Point(-4 * TILE_SIZE, -4 * TILE_SIZE + 4);
-        final MainCharacterEnviroment environment = new MainCharacterEnviroment(MainCharacter.mainCharacter(), initialPosition, input, view, viewRelativePosition);
+        final MainCharacterManager environment = new MainCharacterManager(new MainCharacterElement(), initialPosition, input, view, viewRelativePosition);
         updateHandlers.add(environment::update);
         return environment;
     }

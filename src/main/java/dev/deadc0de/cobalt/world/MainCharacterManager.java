@@ -3,19 +3,16 @@ package dev.deadc0de.cobalt.world;
 import dev.deadc0de.cobalt.Input;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.rendering.View;
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.stream.Stream;
 
-public class MainCharacterEnviroment {
+public class MainCharacterManager {
 
-    private final MainCharacterSprite mainCharacter;
+    private final MainCharacterElement mainCharacter;
     private final Input input;
     private final View followingView;
     private final Point viewRelativePosition;
     private Point position;
 
-    public MainCharacterEnviroment(MainCharacterSprite mainCharacter, Point initialPosition, Input input, View followingView, Point viewRelativePosition) {
+    public MainCharacterManager(MainCharacterElement mainCharacter, Point initialPosition, Input input, View followingView, Point viewRelativePosition) {
         this.mainCharacter = mainCharacter;
         this.input = input;
         this.followingView = followingView;
@@ -46,7 +43,11 @@ public class MainCharacterEnviroment {
         alignView();
     }
 
-    public Stream<Map.Entry<String, Point>> getStateAndPosition() {
-        return Stream.of(new AbstractMap.SimpleImmutableEntry<>(mainCharacter.state(), position));
+    public String state() {
+        return mainCharacter.state();
+    }
+
+    public Point position() {
+        return position;
     }
 }
