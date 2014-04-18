@@ -6,6 +6,7 @@ import dev.deadc0de.cobalt.rendering.RenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingPane;
 import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
 import dev.deadc0de.cobalt.rendering.View;
+import dev.deadc0de.cobalt.world.MainCharacterEnviroment;
 import dev.deadc0de.cobalt.world.Sprite;
 import dev.deadc0de.cobalt.world.SpritesEnvironment;
 import java.util.ArrayList;
@@ -28,13 +29,16 @@ public class Main extends Application {
     private static final int WIDTH = 10;
     private static final int HEIGHT = 9;
     private static final int TILE_SIZE = 16;
+    private static final Dimension RENDERING_AREA = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
 
     private final List<Runnable> updateHandlers;
     private final KeyboardInput input;
+    private final View view;
 
     public Main() {
         updateHandlers = new ArrayList<>();
         input = new KeyboardInput();
+        view = new View(RENDERING_AREA);
         updateHandlers.add(this.input::update);
     }
 
@@ -54,9 +58,7 @@ public class Main extends Application {
     }
 
     private Parent root() {
-        final Dimension renderingArea = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
-        final View view = new View(renderingArea);
-        final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/background.png"));
+        final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/pallet_town.png"));
         final RenderingPane renderingPane = new RenderingPane(background, layers()::stream, view);
         updateHandlers.add(renderingPane::update);
         return renderingPane;
@@ -65,8 +67,8 @@ public class Main extends Application {
     private List<RenderingLayer> layers() {
         final SpritesEnvironment<String> environment = environment();
         final RenderingLayer spritesLayer = new SpritesRenderingLayer<>(Sprites.SPRITES, Sprites.spritesRegions(), environment::getStatesAndPositions);
-        final SpritesEnvironment<String> mainCharacterEnvironment = mainCharacterEnvironment();
-        final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer<>(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacterEnvironment::getStatesAndPositions);
+        final MainCharacterEnviroment mainCharacterEnvironment = mainCharacterEnvironment();
+        final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer<>(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacterEnvironment::getStateAndPosition);
         return Arrays.asList(spritesLayer, mainCharacterLayer);
     }
 
@@ -78,15 +80,50 @@ public class Main extends Application {
 
     private Map<Sprite<String>, Point> sprites() {
         final Map<Sprite<String>, Point> sprites = new HashMap<>();
-        sprites.put(Sprites.signboard(), new Point(2 * TILE_SIZE, 4 * TILE_SIZE));
-        sprites.put(Sprites.flowers(), new Point(1 * TILE_SIZE, 6 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(7 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(7 * TILE_SIZE, 14 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(8 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(8 * TILE_SIZE, 14 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(9 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(9 * TILE_SIZE, 14 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(10 * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(10 * TILE_SIZE, 14 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(13 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(13 * TILE_SIZE, 18 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(14 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(14 * TILE_SIZE, 18 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(15 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(15 * TILE_SIZE, 18 * TILE_SIZE));
+        sprites.put(Sprites.flower(), new Point(16 * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
+        sprites.put(Sprites.flower(), new Point(16 * TILE_SIZE, 18 * TILE_SIZE));
+        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 18 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 18 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 18 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 19 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 19 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 19 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 20 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 20 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 20 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 21 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 21 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 21 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 22 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 22 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 22 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 23 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 23 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 23 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(8 * TILE_SIZE - 8, 24 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(9 * TILE_SIZE - 8, 24 * TILE_SIZE - 8));
+        sprites.put(Sprites.sea(), new Point(10 * TILE_SIZE - 8, 24 * TILE_SIZE - 8));
         return sprites;
     }
 
-    private SpritesEnvironment<String> mainCharacterEnvironment() {
-        final Map<Sprite<String>, Point> sprites = new HashMap<>();
-        sprites.put(MainCharacter.mainCharacter(input), new Point(2 * TILE_SIZE, 6 * TILE_SIZE - 4));
-        final SpritesEnvironment<String> environment = new SpritesEnvironment<>(sprites);
+    private MainCharacterEnviroment mainCharacterEnvironment() {
+        final Point initialPosition = new Point(8 * TILE_SIZE, 9 * TILE_SIZE - 4);
+        final Point viewRelativePosition = new Point(-4 * TILE_SIZE, -4 * TILE_SIZE + 4);
+        final MainCharacterEnviroment environment = new MainCharacterEnviroment(MainCharacter.mainCharacter(), initialPosition, input, view, viewRelativePosition);
         updateHandlers.add(environment::update);
         return environment;
     }

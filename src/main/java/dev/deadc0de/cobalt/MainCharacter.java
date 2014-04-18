@@ -4,7 +4,6 @@ import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.world.MainCharacterSprite;
-import dev.deadc0de.cobalt.world.Sprite;
 import java.util.HashMap;
 import java.util.Map;
 import javafx.scene.image.Image;
@@ -30,7 +29,7 @@ public class MainCharacter {
         return sprites;
     }
 
-    public static Sprite<String> mainCharacter(Input input) {
-        return new MainCharacterSprite(input);
+    public static MainCharacterSprite mainCharacter() {
+        return new MainCharacterSprite();
     }
 }
