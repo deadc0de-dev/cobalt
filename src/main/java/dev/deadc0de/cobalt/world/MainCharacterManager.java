@@ -10,36 +10,50 @@ public class MainCharacterManager {
     private final Input input;
     private final View followingView;
     private final Point viewRelativePosition;
-    private Point position;
+    private final ZoneEnvironment environment;
+    private int column;
+    private int row;
+    private Point absolutePosition;
 
-    public MainCharacterManager(MainCharacterElement mainCharacter, Point initialPosition, Input input, View followingView, Point viewRelativePosition) {
+    public MainCharacterManager(MainCharacterElement mainCharacter, ZoneEnvironment environment, Point initialCell, Point initialPosition, Input input, View followingView, Point viewRelativePosition) {
         this.mainCharacter = mainCharacter;
+        this.environment = environment;
         this.input = input;
         this.followingView = followingView;
         this.viewRelativePosition = viewRelativePosition;
-        this.position = initialPosition;
+        this.column = initialCell.x;
+        this.row = initialCell.y;
+        this.absolutePosition = initialPosition;
         alignView();
     }
 
     private void alignView() {
-        followingView.x = position.x + viewRelativePosition.x;
-        followingView.y = position.y + viewRelativePosition.y;
+        followingView.x = absolutePosition.x + viewRelativePosition.x;
+        followingView.y = absolutePosition.y + viewRelativePosition.y;
     }
 
     public void update() {
         if (mainCharacter.isIdle()) {
             if (input.up()) {
-                mainCharacter.moveUp();
+                if (mainCharacter.moveUp(environment.getCellAt(row - 1, column))) {
+                    row--;
+                }
             } else if (input.down()) {
-                mainCharacter.moveDown();
+                if (mainCharacter.moveDown(environment.getCellAt(row + 1, column))) {
+                    row++;
+                }
             } else if (input.left()) {
-                mainCharacter.moveLeft();
+                if (mainCharacter.moveLeft(environment.getCellAt(row, column - 1))) {
+                    column--;
+                }
             } else if (input.right()) {
-                mainCharacter.moveRight();
+                if (mainCharacter.moveRight(environment.getCellAt(row, column + 1))) {
+                    column++;
+                }
             }
         }
         mainCharacter.update();
-        position = position.add(mainCharacter.direction());
+        absolutePosition = absolutePosition.add(mainCharacter.direction());
         alignView();
     }
 
@@ -48,6 +62,6 @@ public class MainCharacterManager {
     }
 
     public Point position() {
-        return position;
+        return absolutePosition;
     }
 }

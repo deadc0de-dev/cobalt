@@ -2,6 +2,9 @@ package dev.deadc0de.cobalt;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
+import dev.deadc0de.cobalt.geometry.Region;
+import dev.deadc0de.cobalt.grid.ArrayGrid;
+import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.rendering.MovableSprite;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingPane;
@@ -9,10 +12,12 @@ import dev.deadc0de.cobalt.rendering.Sprite;
 import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
 import dev.deadc0de.cobalt.rendering.StationarySprite;
 import dev.deadc0de.cobalt.rendering.View;
+import dev.deadc0de.cobalt.world.Cell;
 import dev.deadc0de.cobalt.world.CyclicStateElement;
 import dev.deadc0de.cobalt.world.MainCharacterManager;
 import dev.deadc0de.cobalt.world.MainCharacterElement;
 import dev.deadc0de.cobalt.world.Zone;
+import dev.deadc0de.cobalt.world.ZoneEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -72,7 +77,7 @@ public class Main extends Application {
     private List<RenderingLayer> layers() {
         final Zone zone = palletTown();
         final RenderingLayer spritesLayer = new SpritesRenderingLayer(Sprites.SPRITES, Sprites.spritesRegions(), zone.sprites);
-        final MainCharacterManager mainCharacterEnvironment = mainCharacterEnvironment();
+        final MainCharacterManager mainCharacterEnvironment = mainCharacterEnvironment(zone.environment);
         final List<Sprite> mainCharacter = Collections.singletonList(new MovableSprite(mainCharacterEnvironment::state, mainCharacterEnvironment::position));
         final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacter::stream);
         return Arrays.asList(spritesLayer, mainCharacterLayer);
@@ -101,17 +106,58 @@ public class Main extends Application {
                 seaPositions.stream().map(position -> new StationarySprite(sea::state, position)))
                 .reduce(Stream.empty(), Stream::concat).collect(Collectors.toList());
         final List<Runnable> updatables = Arrays.asList(flower::update, sea::update);
-        final Zone palletTown = new Zone("pallet-town", sprites::stream, updatables::stream);
+        final Zone palletTown = new Zone("pallet-town", sprites::stream, updatables::stream, environment());
         updateHandlers.add(() -> palletTown.updatables.get().forEach(Runnable::run));
         return palletTown;
     }
 
-    private MainCharacterManager mainCharacterEnvironment() {
+    private ZoneEnvironment environment() {
+        final Grid<Cell> enviroment = new ArrayGrid<>(24, 27);
+        final Cell ground = new Cell("ground");
+        final Cell obstacle = new Cell("solid");
+        final Cell water = new Cell("water");
+        final Cell signboard = new Cell("signboard");
+        fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
+        fillRegion(enviroment, obstacle, new Region(new Point(6, 0), new Dimension(1, 4)));
+        fillRegion(enviroment, obstacle, new Region(new Point(12, 0), new Dimension(1, 4)));
+        fillRegion(enviroment, obstacle, new Region(new Point(15, 0), new Dimension(1, 4)));
+        fillRegion(enviroment, obstacle, new Region(new Point(21, 0), new Dimension(1, 4)));
+        fillRegion(enviroment, obstacle, new Region(new Point(3, 4), new Dimension(10, 1)));
+        fillRegion(enviroment, obstacle, new Region(new Point(13, 4), new Dimension(2, 1)));
+        fillRegion(enviroment, obstacle, new Region(new Point(15, 4), new Dimension(8, 1)));
+        fillRegion(enviroment, obstacle, new Region(new Point(3, 5), new Dimension(1, 15)));
+        fillRegion(enviroment, obstacle, new Region(new Point(22, 5), new Dimension(1, 15)));
+        fillRegion(enviroment, obstacle, new Region(new Point(3, 20), new Dimension(2, 1)));
+        fillRegion(enviroment, obstacle, new Region(new Point(5, 20), new Dimension(2, 1)));
+        fillRegion(enviroment, obstacle, new Region(new Point(11, 20), new Dimension(12, 1)));
+        fillRegion(enviroment, water, new Region(new Point(7, 17), new Dimension(4, 7)));
+        fillRegion(enviroment, obstacle, new Region(new Point(7, 6), new Dimension(4, 3)));
+        fillRegion(enviroment, obstacle, new Region(new Point(15, 6), new Dimension(4, 3)));
+        fillRegion(enviroment, obstacle, new Region(new Point(7, 12), new Dimension(4, 1)));
+        fillRegion(enviroment, obstacle, new Region(new Point(13, 11), new Dimension(6, 4)));
+        fillRegion(enviroment, obstacle, new Region(new Point(13, 16), new Dimension(6, 1)));
+        fillRegion(enviroment, signboard, new Region(new Point(6, 8), new Dimension(1, 1)));
+        fillRegion(enviroment, signboard, new Region(new Point(14, 8), new Dimension(1, 1)));
+        fillRegion(enviroment, signboard, new Region(new Point(10, 12), new Dimension(1, 1)));
+        fillRegion(enviroment, signboard, new Region(new Point(16, 16), new Dimension(1, 1)));
+        return new ZoneEnvironment(enviroment, obstacle);
+    }
+
+    private void fillRegion(Grid<Cell> grid, Cell cell, Region region) {
+        for (int r = region.position.y; r < region.endPosition.y; r++) {
+            for (int c = region.position.x; c < region.endPosition.x; c++) {
+                grid.setAt(r, c, cell);
+            }
+        }
+    }
+
+    private MainCharacterManager mainCharacterEnvironment(ZoneEnvironment environment) {
         final Point initialPosition = new Point(8 * TILE_SIZE, 9 * TILE_SIZE - 4);
+        final Point initialCell = new Point(8, 9);
         final Point viewRelativePosition = new Point(-4 * TILE_SIZE, -4 * TILE_SIZE + 4);
-        final MainCharacterManager environment = new MainCharacterManager(new MainCharacterElement(), initialPosition, input, view, viewRelativePosition);
-        updateHandlers.add(environment::update);
-        return environment;
+        final MainCharacterManager manager = new MainCharacterManager(new MainCharacterElement(), environment, initialCell, initialPosition, input, view, viewRelativePosition);
+        updateHandlers.add(manager::update);
+        return manager;
     }
 
     private void startRendering() {

@@ -9,6 +9,7 @@ public class MainCharacterElement {
 
     private static final Point STAND_STILL = new Point(0, 0);
     private static final int SKIP = 3;
+    private static final int HIT = 10;
 
     private static final Iterable<Frame> UP = new AnimationBuilder<Frame>()
             .add(new Frame("character-up-right", new Point(0, -4)))
@@ -54,6 +55,26 @@ public class MainCharacterElement {
             .add(SKIP, new Frame("character-right", STAND_STILL))
             .animation();
 
+    private static final Iterable<Frame> HIT_UP = new AnimationBuilder<Frame>()
+            .add(HIT, new Frame("character-up-right", STAND_STILL))
+            .add(HIT, new Frame("character-up", STAND_STILL))
+            .animation();
+
+    private static final Iterable<Frame> HIT_DOWN = new AnimationBuilder<Frame>()
+            .add(HIT, new Frame("character-down-right", STAND_STILL))
+            .add(HIT, new Frame("character-down", STAND_STILL))
+            .animation();
+
+    private static final Iterable<Frame> HIT_LEFT = new AnimationBuilder<Frame>()
+            .add(HIT, new Frame("character-left-right", STAND_STILL))
+            .add(HIT, new Frame("character-left", STAND_STILL))
+            .animation();
+
+    private static final Iterable<Frame> HIT_RIGHT = new AnimationBuilder<Frame>()
+            .add(HIT, new Frame("character-right-right", STAND_STILL))
+            .add(HIT, new Frame("character-right", STAND_STILL))
+            .animation();
+
     private Iterator<Frame> currentAnimation;
     private String currentState;
     private Point currentDirection;
@@ -86,28 +107,48 @@ public class MainCharacterElement {
         return !currentAnimation.hasNext();
     }
 
-    public void moveUp() {
+    public boolean moveUp(Cell destination) {
         if (!currentAnimation.hasNext()) {
-            currentAnimation = UP.iterator();
+            if (destination.type.equals("ground")) {
+                currentAnimation = UP.iterator();
+                return true;
+            }
+            currentAnimation = HIT_UP.iterator();
         }
+        return false;
     }
 
-    public void moveDown() {
+    public boolean moveDown(Cell destination) {
         if (!currentAnimation.hasNext()) {
-            currentAnimation = DOWN.iterator();
+            if (destination.type.equals("ground")) {
+                currentAnimation = DOWN.iterator();
+                return true;
+            }
+            currentAnimation = HIT_DOWN.iterator();
         }
+        return false;
     }
 
-    public void moveLeft() {
+    public boolean moveLeft(Cell destination) {
         if (!currentAnimation.hasNext()) {
-            currentAnimation = LEFT.iterator();
+            if (destination.type.equals("ground")) {
+                currentAnimation = LEFT.iterator();
+                return true;
+            }
+            currentAnimation = HIT_LEFT.iterator();
         }
+        return false;
     }
 
-    public void moveRight() {
+    public boolean moveRight(Cell destination) {
         if (!currentAnimation.hasNext()) {
-            currentAnimation = RIGHT.iterator();
+            if (destination.type.equals("ground")) {
+                currentAnimation = RIGHT.iterator();
+                return true;
+            }
+            currentAnimation = HIT_RIGHT.iterator();
         }
+        return false;
     }
 
     private static class Frame {
