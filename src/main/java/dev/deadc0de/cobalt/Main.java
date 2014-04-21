@@ -14,7 +14,7 @@ import dev.deadc0de.cobalt.rendering.StationarySprite;
 import dev.deadc0de.cobalt.rendering.View;
 import dev.deadc0de.cobalt.world.Cell;
 import dev.deadc0de.cobalt.world.CyclicStateElement;
-import dev.deadc0de.cobalt.world.MainCharacterManager;
+import dev.deadc0de.cobalt.world.MainCharacterController;
 import dev.deadc0de.cobalt.world.MainCharacterElement;
 import dev.deadc0de.cobalt.world.PositionTracker;
 import dev.deadc0de.cobalt.world.Zone;
@@ -163,7 +163,7 @@ public class Main extends Application {
             view.y += y;
         };
         final MainCharacterElement mainCharacterElement = new MainCharacterElement(mainCharacterSprite::setState, onCharacterMoved);
-        final MainCharacterManager manager = new MainCharacterManager(mainCharacterElement, input, environment, 9, 8);
+        final MainCharacterController manager = new MainCharacterController(mainCharacterElement, input, environment, 9, 8);
         updateHandlers.add(manager::update);
         return mainCharacterSprite;
     }

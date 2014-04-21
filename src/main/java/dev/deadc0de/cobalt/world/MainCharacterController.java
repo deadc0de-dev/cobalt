@@ -2,7 +2,7 @@ package dev.deadc0de.cobalt.world;
 
 import dev.deadc0de.cobalt.Input;
 
-public class MainCharacterManager {
+public class MainCharacterController {
 
     private final MainCharacterElement mainCharacter;
     private final Input input;
@@ -10,7 +10,7 @@ public class MainCharacterManager {
     private int row;
     private int column;
 
-    public MainCharacterManager(MainCharacterElement mainCharacter, Input input, ZoneEnvironment environment, int initialRow, int initialColumn) {
+    public MainCharacterController(MainCharacterElement mainCharacter, Input input, ZoneEnvironment environment, int initialRow, int initialColumn) {
         this.mainCharacter = mainCharacter;
         this.input = input;
         this.environment = environment;
