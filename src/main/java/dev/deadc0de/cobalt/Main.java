@@ -5,7 +5,7 @@ import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
-import dev.deadc0de.cobalt.rendering.MovableSprite;
+import dev.deadc0de.cobalt.rendering.MutableSprite;
 import dev.deadc0de.cobalt.rendering.RenderingLayer;
 import dev.deadc0de.cobalt.rendering.RenderingPane;
 import dev.deadc0de.cobalt.rendering.Sprite;
@@ -16,6 +16,7 @@ import dev.deadc0de.cobalt.world.Cell;
 import dev.deadc0de.cobalt.world.CyclicStateElement;
 import dev.deadc0de.cobalt.world.MainCharacterManager;
 import dev.deadc0de.cobalt.world.MainCharacterElement;
+import dev.deadc0de.cobalt.world.PositionTracker;
 import dev.deadc0de.cobalt.world.Zone;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
 import java.util.ArrayList;
@@ -77,8 +78,8 @@ public class Main extends Application {
     private List<RenderingLayer> layers() {
         final Zone zone = palletTown();
         final RenderingLayer spritesLayer = new SpritesRenderingLayer(Sprites.SPRITES, Sprites.spritesRegions(), zone.sprites);
-        final MainCharacterManager mainCharacterEnvironment = mainCharacterEnvironment(zone.environment);
-        final List<Sprite> mainCharacter = Collections.singletonList(new MovableSprite(mainCharacterEnvironment::state, mainCharacterEnvironment::position));
+        final Sprite mainCharacterSprite = mainCharacterEnvironment(zone.environment);
+        final List<Sprite> mainCharacter = Collections.singletonList(mainCharacterSprite);
         final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacter::stream);
         return Arrays.asList(spritesLayer, mainCharacterLayer);
     }
@@ -151,13 +152,20 @@ public class Main extends Application {
         }
     }
 
-    private MainCharacterManager mainCharacterEnvironment(ZoneEnvironment environment) {
+    private Sprite mainCharacterEnvironment(ZoneEnvironment environment) {
         final Point initialPosition = new Point(8 * TILE_SIZE, 9 * TILE_SIZE - 4);
-        final Point initialCell = new Point(8, 9);
-        final Point viewRelativePosition = new Point(-4 * TILE_SIZE, -4 * TILE_SIZE + 4);
-        final MainCharacterManager manager = new MainCharacterManager(new MainCharacterElement(), environment, initialCell, initialPosition, input, view, viewRelativePosition);
+        final MutableSprite mainCharacterSprite = new MutableSprite(null, initialPosition);
+        view.x = initialPosition.x - 4 * TILE_SIZE;
+        view.y = initialPosition.y - 4 * TILE_SIZE + 4;
+        final PositionTracker onCharacterMoved = (x, y) -> {
+            mainCharacterSprite.setPosition(mainCharacterSprite.position().add(new Point(x, y)));
+            view.x += x;
+            view.y += y;
+        };
+        final MainCharacterElement mainCharacterElement = new MainCharacterElement(mainCharacterSprite::setState, onCharacterMoved);
+        final MainCharacterManager manager = new MainCharacterManager(mainCharacterElement, input, environment, 9, 8);
         updateHandlers.add(manager::update);
-        return manager;
+        return mainCharacterSprite;
     }
 
     private void startRendering() {
