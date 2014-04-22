@@ -20,7 +20,9 @@ public class MainCharacterController {
 
     public void update() {
         if (mainCharacter.isIdle()) {
-            if (input.up()) {
+            if (input.action()) {
+                getNearCell(mainCharacter.currentDirection()).action.run();
+            } else if (input.up()) {
                 tryMove(Direction.UP, row - 1, column);
             } else if (input.down()) {
                 tryMove(Direction.DOWN, row + 1, column);
@@ -31,6 +33,21 @@ public class MainCharacterController {
             }
         }
         mainCharacter.update();
+    }
+
+    private Cell getNearCell(Direction direction) {
+        switch (direction) {
+            case UP:
+                return environment.getCellAt(row - 1, column);
+            case DOWN:
+                return environment.getCellAt(row + 1, column);
+            case LEFT:
+                return environment.getCellAt(row, column - 1);
+            case RIGHT:
+                return environment.getCellAt(row, column + 1);
+            default:
+                throw new IllegalStateException("unknown direction");
+        }
     }
 
     private void tryMove(Direction direction, int targetRow, int targetColumn) {

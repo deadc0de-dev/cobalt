@@ -12,6 +12,7 @@ import dev.deadc0de.cobalt.rendering.Sprite;
 import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
 import dev.deadc0de.cobalt.rendering.StationarySprite;
 import dev.deadc0de.cobalt.rendering.View;
+import dev.deadc0de.cobalt.text.SpriteTextOutput;
 import dev.deadc0de.cobalt.world.Cell;
 import dev.deadc0de.cobalt.world.CyclicStateElement;
 import dev.deadc0de.cobalt.world.MainCharacterController;
@@ -32,6 +33,7 @@ import javafx.application.Application;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -45,12 +47,15 @@ public class Main extends Application {
     private final List<Runnable> updateHandlers;
     private final KeyboardInput input;
     private final View view;
+    private final SpriteTextOutput prompt;
 
     public Main() {
         updateHandlers = new ArrayList<>();
         input = new KeyboardInput();
         view = new View(RENDERING_AREA);
-        updateHandlers.add(this.input::update);
+        prompt = new SpriteTextOutput(input::action);
+        updateHandlers.add(input::update);
+        updateHandlers.add(prompt::update);
     }
 
     public static void main(String... args) {
@@ -72,7 +77,14 @@ public class Main extends Application {
         final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/pallet_town.png"));
         final RenderingPane renderingPane = new RenderingPane(background, layers()::stream, view);
         updateHandlers.add(renderingPane::update);
-        return renderingPane;
+        final Image message = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/message.png"));
+        final RenderingPane textPane = new RenderingPane(message, textLayer()::stream, new View(RENDERING_AREA));
+        updateHandlers.add(textPane::update);
+        return new StackPane(renderingPane, textPane);
+    }
+
+    private List<RenderingLayer> textLayer() {
+        return Collections.singletonList(new SpritesRenderingLayer(Text.SPRITES, Text.spritesRegions(), prompt::sprites));
     }
 
     private List<RenderingLayer> layers() {
@@ -117,7 +129,7 @@ public class Main extends Application {
         final Cell ground = new Cell("ground");
         final Cell obstacle = new Cell("solid");
         final Cell water = new Cell("water");
-        final Cell signboard = new Cell("signboard");
+        final Cell signboard = new Cell("signboard", () -> prompt.print("Under development:please retry      later!"));
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
         fillRegion(enviroment, obstacle, new Region(new Point(6, 0), new Dimension(1, 4)));
         fillRegion(enviroment, obstacle, new Region(new Point(12, 0), new Dimension(1, 4)));

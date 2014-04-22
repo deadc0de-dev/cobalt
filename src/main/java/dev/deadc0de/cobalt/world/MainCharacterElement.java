@@ -83,11 +83,13 @@ public class MainCharacterElement {
     private final Consumer<String> stateTracker;
     private final PositionTracker positionTracker;
     private Iterator<Frame> currentAnimation;
+    private Direction currentDirection;
 
     public MainCharacterElement(Consumer<String> stateTracker, PositionTracker positionTracker) {
         this.stateTracker = stateTracker;
         this.positionTracker = positionTracker;
         this.currentAnimation = Collections.emptyIterator();
+        this.currentDirection = Direction.DOWN;
         this.stateTracker.accept("character-down");
     }
 
@@ -106,13 +108,19 @@ public class MainCharacterElement {
     public void move(Direction direction) {
         if (!currentAnimation.hasNext()) {
             currentAnimation = moveAnimations.get(direction).iterator();
+            currentDirection = direction;
         }
     }
 
     public void hit(Direction direction) {
         if (!currentAnimation.hasNext()) {
             currentAnimation = hitAnimations.get(direction).iterator();
+            currentDirection = direction;
         }
+    }
+
+    public Direction currentDirection() {
+        return currentDirection;
     }
 
     private static class Frame {
