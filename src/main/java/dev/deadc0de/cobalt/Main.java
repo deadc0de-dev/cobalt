@@ -3,13 +3,12 @@ package dev.deadc0de.cobalt;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
+import dev.deadc0de.cobalt.rendering.GraphicsFacade;
+import dev.deadc0de.cobalt.rendering.javafx.JavaFXGraphicsFacade;
 import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.rendering.MutableSprite;
-import dev.deadc0de.cobalt.rendering.RenderingLayer;
-import dev.deadc0de.cobalt.rendering.RenderingPane;
 import dev.deadc0de.cobalt.rendering.Sprite;
-import dev.deadc0de.cobalt.rendering.SpritesRenderingLayer;
 import dev.deadc0de.cobalt.rendering.StationarySprite;
 import dev.deadc0de.cobalt.rendering.View;
 import dev.deadc0de.cobalt.text.SpriteTextOutput;
@@ -22,16 +21,17 @@ import dev.deadc0de.cobalt.world.Zone;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.StackPane;
@@ -45,18 +45,21 @@ public class Main extends Application {
     private static final int TILE_SIZE = 16;
     private static final Dimension RENDERING_AREA = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
 
-    private final List<Runnable> updateHandlers;
-    private final KeyboardInput input;
-    private final View view;
+    private final List<Runnable> updateHandlers = new ArrayList<>();
+    private final KeyboardInput input = new KeyboardInput();
+    private final View view = new View(RENDERING_AREA);
     private final SpriteTextOutput prompt;
+    private final Function<String, Image> imagesRepository = imagesRepository();
+    private final Function<String, Function<String, Region>> spritesRegionsRepository = spritesRegionsRepository();
+    private final StackPane root = new StackPane();
+    private final GraphicsFacade graphics;
 
     public Main() {
-        updateHandlers = new ArrayList<>();
-        input = new KeyboardInput();
-        view = new View(RENDERING_AREA);
         prompt = new SpriteTextOutput(input::action);
         updateHandlers.add(input::update);
         updateHandlers.add(prompt::update);
+        graphics = new JavaFXGraphicsFacade(root.getChildren(), imagesRepository, spritesRegionsRepository);
+        setupGraphics();
     }
 
     public static void main(String... args) {
@@ -65,7 +68,7 @@ public class Main extends Application {
 
     @Override
     public void start(Stage stage) throws Exception {
-        final Scene scene = new Scene(root());
+        final Scene scene = new Scene(root);
         scene.setOnKeyPressed(input::keyDown);
         scene.setOnKeyReleased(input::keyUp);
         stage.setScene(scene);
@@ -74,27 +77,33 @@ public class Main extends Application {
         stage.show();
     }
 
-    private Parent root() {
-        final Image background = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/pallet_town.png"));
-        final RenderingPane renderingPane = new RenderingPane(background, layers()::stream, view);
-        updateHandlers.add(renderingPane::update);
-        final Image message = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/message.png"));
-        final RenderingPane textPane = new RenderingPane(message, textLayer()::stream, new View(RENDERING_AREA));
-        updateHandlers.add(textPane::update);
-        return new StackPane(renderingPane, textPane);
+    private Function<String, Image> imagesRepository() {
+        final Map<String, Image> repository = new HashMap();
+        repository.put("pallet-town", new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/pallet_town.png")));
+        repository.put("text-background", new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/message.png")));
+        repository.put("text", Text.SPRITES);
+        repository.put("sprites", Sprites.SPRITES);
+        repository.put("main-character", MainCharacter.SPRITES);
+        return repository::get;
     }
 
-    private List<RenderingLayer> textLayer() {
-        return Collections.singletonList(new SpritesRenderingLayer(Text.SPRITES, Text.spritesRegions(), prompt::sprites));
+    private Function<String, Function<String, Region>> spritesRegionsRepository() {
+        final Map<String, Function<String, Region>> repository = new HashMap();
+        repository.put("text", Text.spritesRegions()::get);
+        repository.put("sprites", Sprites.spritesRegions()::get);
+        repository.put("main-character", MainCharacter.spritesRegions()::get);
+        return repository::get;
     }
 
-    private List<RenderingLayer> layers() {
+    private void setupGraphics() {
         final Zone zone = palletTown();
-        final RenderingLayer spritesLayer = new SpritesRenderingLayer(Sprites.SPRITES, Sprites.spritesRegions(), zone.sprites);
         final Sprite mainCharacterSprite = mainCharacterEnvironment(zone.environment);
-        final List<Sprite> mainCharacter = Collections.singletonList(mainCharacterSprite);
-        final RenderingLayer mainCharacterLayer = new SpritesRenderingLayer(MainCharacter.SPRITES, MainCharacter.spritesRegions(), mainCharacter::stream);
-        return Arrays.asList(spritesLayer, mainCharacterLayer);
+        updateHandlers.add(graphics.pushImageLayer("pallet-town", view));
+        updateHandlers.add(graphics.pushSpritesLayer("sprites", zone.sprites, view));
+        updateHandlers.add(graphics.pushSpritesLayer("main-character", () -> Stream.of(mainCharacterSprite), view));
+        final View textView = new View(RENDERING_AREA);
+        graphics.pushImageLayer("text-background", textView);
+        updateHandlers.add(graphics.pushSpritesLayer("text", prompt::sprites, textView));
     }
 
     private Zone palletTown() {
