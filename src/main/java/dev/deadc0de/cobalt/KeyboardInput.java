@@ -1,132 +1,94 @@
 package dev.deadc0de.cobalt;
 
+import java.util.EnumMap;
+import java.util.Map;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
 public class KeyboardInput implements Input {
 
-    private boolean w;
-    private boolean s;
-    private boolean a;
-    private boolean d;
-    private boolean enter;
-    private boolean backsapce;
-    private boolean space;
-    private boolean z;
-    private boolean up;
-    private boolean down;
-    private boolean left;
-    private boolean right;
-    private boolean action;
-    private boolean cancel;
-    private boolean pause;
-    private boolean optional;
+    private static final int UP = 0;
+    private static final int DOWN = 1;
+    private static final int LEFT = 2;
+    private static final int RIGHT = 3;
+    private static final int ACTION = 4;
+    private static final int CANCEL = 5;
+    private static final int PAUSE = 6;
+    private static final int OPTIONAL = 7;
+    private static final int INPUT_TYPES = 8;
+
+    private static final Map<KeyCode, Integer> inputMappings = new EnumMap<>(KeyCode.class);
+
+    static {
+        inputMappings.put(KeyCode.W, UP);
+        inputMappings.put(KeyCode.S, DOWN);
+        inputMappings.put(KeyCode.A, LEFT);
+        inputMappings.put(KeyCode.D, RIGHT);
+        inputMappings.put(KeyCode.ENTER, ACTION);
+        inputMappings.put(KeyCode.BACK_SPACE, CANCEL);
+        inputMappings.put(KeyCode.SPACE, PAUSE);
+        inputMappings.put(KeyCode.Z, OPTIONAL);
+    }
+
+    private final boolean[] keyStates = new boolean[INPUT_TYPES];
+    private final boolean[] keyCache = new boolean[INPUT_TYPES];
+    private final boolean[] activeKeys = new boolean[INPUT_TYPES];
 
     public void update() {
-        up = w;
-        down = s;
-        left = a;
-        right = d;
-        action = enter;
-        cancel = backsapce;
-        pause = space;
-        optional = z;
+        System.arraycopy(keyCache, 0, activeKeys, 0, INPUT_TYPES);
+        System.arraycopy(keyStates, 0, keyCache, 0, INPUT_TYPES);
     }
 
     public void keyUp(KeyEvent keyEvent) {
-        switch (keyEvent.getCode()) {
-            case W:
-                w = false;
-                break;
-            case S:
-                s = false;
-                break;
-            case A:
-                a = false;
-                break;
-            case D:
-                d = false;
-                break;
-            case ENTER:
-                enter = false;
-                break;
-            case BACK_SPACE:
-                backsapce = false;
-                break;
-            case SPACE:
-                space = false;
-                break;
-            case Z:
-                z = false;
-                break;
+        if (inputMappings.containsKey(keyEvent.getCode())) {
+            keyStates[inputMappings.get(keyEvent.getCode())] = false;
         }
     }
 
     public void keyDown(KeyEvent keyEvent) {
-        switch (keyEvent.getCode()) {
-            case W:
-                w = true;
-                break;
-            case S:
-                s = true;
-                break;
-            case A:
-                a = true;
-                break;
-            case D:
-                d = true;
-                break;
-            case ENTER:
-                enter = true;
-                break;
-            case BACK_SPACE:
-                backsapce = true;
-                break;
-            case SPACE:
-                space = true;
-                break;
-            case Z:
-                z = true;
-                break;
+        if (inputMappings.containsKey(keyEvent.getCode())) {
+            final int keyType = inputMappings.get(keyEvent.getCode());
+            keyCache[keyType] = keyStates[keyType] = true;
         }
     }
 
     @Override
     public boolean up() {
-        return up;
+        return activeKeys[UP];
     }
 
     @Override
     public boolean down() {
-        return down;
+        return activeKeys[DOWN];
     }
 
     @Override
     public boolean left() {
-        return left;
+        return activeKeys[LEFT];
     }
 
     @Override
     public boolean right() {
-        return right;
+        return activeKeys[RIGHT];
     }
 
     @Override
     public boolean action() {
-        return action;
+        return activeKeys[ACTION];
     }
 
     @Override
     public boolean cancel() {
-        return cancel;
+        return activeKeys[CANCEL];
     }
 
     @Override
     public boolean pause() {
-        return pause;
+        return activeKeys[PAUSE];
     }
 
     @Override
     public boolean optional() {
-        return optional;
+        return activeKeys[OPTIONAL];
     }
 }
