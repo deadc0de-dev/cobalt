@@ -1,11 +1,13 @@
 package dev.deadc0de.cobalt;
 
+import dev.deadc0de.cobalt.animation.AnimationBuilder;
+import dev.deadc0de.cobalt.animation.LoopAnimation;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.world.CyclicStateElement;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import javafx.scene.image.Image;
 
 public class Sprites {
@@ -27,23 +29,33 @@ public class Sprites {
         return sprites;
     }
 
-    public static CyclicStateElement flower() {
-        return new CyclicStateElement(new AnimationBuilder()
-                .add(10, "flower-1")
-                .add(10, "flower-2")
-                .add(10, "flower-3")
-                .add(10, "flower-4")
-                .animation());
+    public static Iterable<Runnable> flower(Consumer<String> stateTracker) {
+        return LoopAnimation.indefinite(AnimationBuilder.startWith(stateTracker)
+                .run(state -> state.accept("flower-1"))
+                .sleep(9)
+                .run(state -> state.accept("flower-2"))
+                .sleep(9)
+                .run(state -> state.accept("flower-3"))
+                .sleep(9)
+                .run(state -> state.accept("flower-4"))
+                .sleep(9)
+                .end());
     }
 
-    public static CyclicStateElement sea() {
-        return new CyclicStateElement(new AnimationBuilder()
-                .add(10, "sea-1")
-                .add(10, "sea-2")
-                .add(10, "sea-3")
-                .add(10, "sea-4")
-                .add(10, "sea-5")
-                .add(10, "sea-6")
-                .animation());
+    public static Iterable<Runnable> sea(Consumer<String> stateTracker) {
+        return LoopAnimation.indefinite(AnimationBuilder.startWith(stateTracker)
+                .run(state -> state.accept("sea-1"))
+                .sleep(9)
+                .run(state -> state.accept("sea-2"))
+                .sleep(9)
+                .run(state -> state.accept("sea-3"))
+                .sleep(9)
+                .run(state -> state.accept("sea-4"))
+                .sleep(9)
+                .run(state -> state.accept("sea-5"))
+                .sleep(9)
+                .run(state -> state.accept("sea-6"))
+                .sleep(9)
+                .end());
     }
 }

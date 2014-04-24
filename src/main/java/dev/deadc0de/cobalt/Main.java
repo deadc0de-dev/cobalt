@@ -14,15 +14,16 @@ import dev.deadc0de.cobalt.rendering.StationarySprite;
 import dev.deadc0de.cobalt.rendering.View;
 import dev.deadc0de.cobalt.text.SpriteTextOutput;
 import dev.deadc0de.cobalt.world.Cell;
-import dev.deadc0de.cobalt.world.CyclicStateElement;
 import dev.deadc0de.cobalt.world.MainCharacterController;
 import dev.deadc0de.cobalt.world.MainCharacterElement;
+import dev.deadc0de.cobalt.world.MutableElement;
 import dev.deadc0de.cobalt.world.PositionTracker;
 import dev.deadc0de.cobalt.world.Zone;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -97,7 +98,8 @@ public class Main extends Application {
     }
 
     private Zone palletTown() {
-        final CyclicStateElement flower = Sprites.flower();
+        final MutableElement flower = new MutableElement();
+        final Iterator<Runnable> flowerAnimation = Sprites.flower(flower::setState).iterator();
         final List<Point> flowersPositions = new ArrayList<>();
         for (int c = 7; c <= 10; c++) {
             flowersPositions.add(new Point(c * TILE_SIZE + 8, 13 * TILE_SIZE + 8));
@@ -107,7 +109,8 @@ public class Main extends Application {
             flowersPositions.add(new Point(c * TILE_SIZE + 8, 17 * TILE_SIZE + 8));
             flowersPositions.add(new Point(c * TILE_SIZE, 18 * TILE_SIZE));
         }
-        final CyclicStateElement sea = Sprites.sea();
+        final MutableElement sea = new MutableElement();
+        final Iterator<Runnable> seaAnimation = Sprites.sea(sea::setState).iterator();
         final List<Point> seaPositions = new ArrayList<>();
         for (int r = 18; r <= 24; r++) {
             for (int c = 8; c <= 10; c++) {
@@ -118,7 +121,7 @@ public class Main extends Application {
                 flowersPositions.stream().map(position -> new StationarySprite(flower::state, position)),
                 seaPositions.stream().map(position -> new StationarySprite(sea::state, position)))
                 .reduce(Stream.empty(), Stream::concat).collect(Collectors.toList());
-        final List<Runnable> updatables = Arrays.asList(flower::update, sea::update);
+        final List<Runnable> updatables = Arrays.asList(() -> flowerAnimation.next().run(), () -> seaAnimation.next().run());
         final Zone palletTown = new Zone("pallet-town", sprites::stream, updatables::stream, environment());
         updateHandlers.add(() -> palletTown.updatables.get().forEach(Runnable::run));
         return palletTown;

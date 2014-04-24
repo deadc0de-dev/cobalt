@@ -1,6 +1,6 @@
 package dev.deadc0de.cobalt.world;
 
-import dev.deadc0de.cobalt.AnimationBuilder;
+import dev.deadc0de.cobalt.animation.AnimationBuilder;
 import dev.deadc0de.cobalt.geometry.Point;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -10,82 +10,19 @@ import java.util.function.Consumer;
 
 public class MainCharacterElement {
 
-    private static final Point STAND_STILL = new Point(0, 0);
     private static final int SKIP = 3;
-    private static final int HIT = 10;
+    private static final int HIT = 9;
 
-    private static final Map<Direction, Iterable<Frame>> moveAnimations = new EnumMap<>(Direction.class);
-
-    static {
-        moveAnimations.put(Direction.UP, new AnimationBuilder<Frame>()
-                .add(new Frame("character-up-right", new Point(0, -4)))
-                .add(SKIP, new Frame("character-up-right", STAND_STILL))
-                .add(new Frame("character-up", new Point(0, -4)))
-                .add(SKIP, new Frame("character-up", STAND_STILL))
-                .add(new Frame("character-up-left", new Point(0, -4)))
-                .add(SKIP, new Frame("character-up-left", STAND_STILL))
-                .add(new Frame("character-up", new Point(0, -4)))
-                .add(SKIP, new Frame("character-up", STAND_STILL))
-                .animation());
-        moveAnimations.put(Direction.DOWN, new AnimationBuilder<Frame>()
-                .add(new Frame("character-down-right", new Point(0, 4)))
-                .add(SKIP, new Frame("character-down-right", STAND_STILL))
-                .add(new Frame("character-down", new Point(0, 4)))
-                .add(SKIP, new Frame("character-down", STAND_STILL))
-                .add(new Frame("character-down-left", new Point(0, 4)))
-                .add(SKIP, new Frame("character-down-left", STAND_STILL))
-                .add(new Frame("character-down", new Point(0, 4)))
-                .add(SKIP, new Frame("character-down", STAND_STILL))
-                .animation());
-        moveAnimations.put(Direction.LEFT, new AnimationBuilder<Frame>()
-                .add(new Frame("character-left-right", new Point(-4, 0)))
-                .add(SKIP, new Frame("character-left-right", STAND_STILL))
-                .add(new Frame("character-left", new Point(-4, 0)))
-                .add(SKIP, new Frame("character-left", STAND_STILL))
-                .add(new Frame("character-left-left", new Point(-4, 0)))
-                .add(SKIP, new Frame("character-left-left", STAND_STILL))
-                .add(new Frame("character-left", new Point(-4, 0)))
-                .add(SKIP, new Frame("character-left", STAND_STILL))
-                .animation());
-        moveAnimations.put(Direction.RIGHT, new AnimationBuilder<Frame>()
-                .add(new Frame("character-right-right", new Point(4, 0)))
-                .add(SKIP, new Frame("character-right-right", STAND_STILL))
-                .add(new Frame("character-right", new Point(4, 0)))
-                .add(SKIP, new Frame("character-right", STAND_STILL))
-                .add(new Frame("character-right-left", new Point(4, 0)))
-                .add(SKIP, new Frame("character-right-left", STAND_STILL))
-                .add(new Frame("character-right", new Point(4, 0)))
-                .add(SKIP, new Frame("character-right", STAND_STILL))
-                .animation());
-    }
-
-    private static final Map<Direction, Iterable<Frame>> hitAnimations = new EnumMap<>(Direction.class);
-
-    static {
-        hitAnimations.put(Direction.UP, new AnimationBuilder<Frame>()
-                .add(HIT, new Frame("character-up-right", STAND_STILL))
-                .add(HIT, new Frame("character-up", STAND_STILL))
-                .animation());
-        hitAnimations.put(Direction.DOWN, new AnimationBuilder<Frame>()
-                .add(HIT, new Frame("character-down-right", STAND_STILL))
-                .add(HIT, new Frame("character-down", STAND_STILL))
-                .animation());
-        hitAnimations.put(Direction.LEFT, new AnimationBuilder<Frame>()
-                .add(HIT, new Frame("character-left-right", STAND_STILL))
-                .add(HIT, new Frame("character-left", STAND_STILL))
-                .animation());
-        hitAnimations.put(Direction.RIGHT, new AnimationBuilder<Frame>()
-                .add(HIT, new Frame("character-right-right", STAND_STILL))
-                .add(HIT, new Frame("character-right", STAND_STILL))
-                .animation());
-    }
-
+    private final Map<Direction, Iterable<Runnable>> moveAnimations;
+    private final Map<Direction, Iterable<Runnable>> hitAnimations;
     private final Consumer<String> stateTracker;
     private final PositionTracker positionTracker;
-    private Iterator<Frame> currentAnimation;
+    private Iterator<Runnable> currentAnimation;
     private Direction currentDirection;
 
     public MainCharacterElement(Consumer<String> stateTracker, PositionTracker positionTracker) {
+        moveAnimations = moveAnimations();
+        hitAnimations = hitAnimations();
         this.stateTracker = stateTracker;
         this.positionTracker = positionTracker;
         this.currentAnimation = Collections.emptyIterator();
@@ -95,9 +32,7 @@ public class MainCharacterElement {
 
     public void update() {
         if (currentAnimation.hasNext()) {
-            final Frame next = currentAnimation.next();
-            stateTracker.accept(next.state);
-            positionTracker.move(next.direction.x, next.direction.y);
+            currentAnimation.next().run();
         }
     }
 
@@ -132,5 +67,88 @@ public class MainCharacterElement {
             this.state = state;
             this.direction = direction;
         }
+    }
+
+    private void updateStateAndMove(String newState, int dx, int dy) {
+        stateTracker.accept(newState);
+        positionTracker.move(dx, dy);
+    }
+
+    private Map<Direction, Iterable<Runnable>> moveAnimations() {
+        final Map<Direction, Iterable<Runnable>> animations = new EnumMap<>(Direction.class);
+        animations.put(Direction.UP, AnimationBuilder.startWith(this)
+                .run(character -> character.updateStateAndMove("character-up-right", 0, -4))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-up", 0, -4))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-up-left", 0, -4))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-up", 0, -4))
+                .sleep(SKIP)
+                .end());
+        animations.put(Direction.DOWN, AnimationBuilder.startWith(this)
+                .run(character -> character.updateStateAndMove("character-down-right", 0, 4))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-down", 0, 4))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-down-left", 0, 4))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-down", 0, 4))
+                .sleep(SKIP)
+                .end());
+        animations.put(Direction.LEFT, AnimationBuilder.startWith(this)
+                .run(character -> character.updateStateAndMove("character-left-right", -4, 0))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-left", -4, 0))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-left-left", -4, 0))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-left", -4, 0))
+                .sleep(SKIP)
+                .end());
+        animations.put(Direction.RIGHT, AnimationBuilder.startWith(this)
+                .run(character -> character.updateStateAndMove("character-right-right", 4, 0))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-right", 4, 0))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-right-left", 4, 0))
+                .sleep(SKIP)
+                .run(character -> character.updateStateAndMove("character-right", 4, 0))
+                .sleep(SKIP)
+                .end());
+        return animations;
+    }
+
+    private Map<Direction, Iterable<Runnable>> hitAnimations() {
+        final Map<Direction, Iterable<Runnable>> animations = new EnumMap<>(Direction.class);
+        animations.put(Direction.UP, AnimationBuilder.startWith(this)
+                .run(character -> character.stateTracker.accept("character-up-right"))
+                .sleep(HIT)
+                .run(character -> character.stateTracker.accept("character-up"))
+                .sleep(HIT)
+                .end()
+        );
+        animations.put(Direction.DOWN, AnimationBuilder.startWith(this)
+                .run(character -> character.stateTracker.accept("character-down-right"))
+                .sleep(HIT)
+                .run(character -> character.stateTracker.accept("character-down"))
+                .sleep(HIT)
+                .end()
+        );
+        animations.put(Direction.LEFT, AnimationBuilder.startWith(this)
+                .run(character -> character.stateTracker.accept("character-left-right"))
+                .sleep(HIT)
+                .run(character -> character.stateTracker.accept("character-left"))
+                .sleep(HIT)
+                .end()
+        );
+        animations.put(Direction.RIGHT, AnimationBuilder.startWith(this)
+                .run(character -> character.stateTracker.accept("character-right-right"))
+                .sleep(HIT)
+                .run(character -> character.stateTracker.accept("character-right"))
+                .sleep(HIT)
+                .end()
+        );
+        return animations;
     }
 }
