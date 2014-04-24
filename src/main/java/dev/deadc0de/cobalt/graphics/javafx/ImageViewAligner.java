@@ -1,6 +1,6 @@
-package dev.deadc0de.cobalt.rendering.javafx;
+package dev.deadc0de.cobalt.graphics.javafx;
 
-import dev.deadc0de.cobalt.rendering.View;
+import dev.deadc0de.cobalt.graphics.View;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.image.ImageView;
 

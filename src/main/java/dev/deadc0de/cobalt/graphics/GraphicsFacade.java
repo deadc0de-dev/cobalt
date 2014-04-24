@@ -1,4 +1,4 @@
-package dev.deadc0de.cobalt.rendering;
+package dev.deadc0de.cobalt.graphics;
 
 import java.util.function.Supplier;
 import java.util.stream.Stream;

@@ -1,8 +1,8 @@
 package dev.deadc0de.cobalt.text;
 
 import dev.deadc0de.cobalt.geometry.Point;
-import dev.deadc0de.cobalt.rendering.Sprite;
-import dev.deadc0de.cobalt.rendering.StationarySprite;
+import dev.deadc0de.cobalt.graphics.Sprite;
+import dev.deadc0de.cobalt.graphics.StationarySprite;
 import java.util.Arrays;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;

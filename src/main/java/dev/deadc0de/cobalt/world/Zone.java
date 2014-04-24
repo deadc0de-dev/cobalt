@@ -1,6 +1,6 @@
 package dev.deadc0de.cobalt.world;
 
-import dev.deadc0de.cobalt.rendering.Sprite;
+import dev.deadc0de.cobalt.graphics.Sprite;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 

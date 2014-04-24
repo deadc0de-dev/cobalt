@@ -1,4 +1,4 @@
-package dev.deadc0de.cobalt.rendering;
+package dev.deadc0de.cobalt.graphics;
 
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;

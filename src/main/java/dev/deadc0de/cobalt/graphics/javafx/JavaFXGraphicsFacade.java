@@ -1,9 +1,9 @@
-package dev.deadc0de.cobalt.rendering.javafx;
+package dev.deadc0de.cobalt.graphics.javafx;
 
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.rendering.GraphicsFacade;
-import dev.deadc0de.cobalt.rendering.Sprite;
-import dev.deadc0de.cobalt.rendering.View;
+import dev.deadc0de.cobalt.graphics.GraphicsFacade;
+import dev.deadc0de.cobalt.graphics.Sprite;
+import dev.deadc0de.cobalt.graphics.View;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
