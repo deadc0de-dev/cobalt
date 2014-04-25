@@ -15,6 +15,9 @@ import java.util.stream.Stream;
 
 public class SpriteTextOutput implements TextOutput {
 
+    private static final Consumer<TextOutput> NOOP = textOutput -> {
+    };
+
     private final InputFacade input;
     private final GraphicsFacade graphics;
     private final View view;
@@ -61,7 +64,7 @@ public class SpriteTextOutput implements TextOutput {
 
     @Override
     public void print(String text) {
-        print(text, TextOutput::dismiss);
+        print(text, NOOP);
     }
 
     @Override
@@ -79,8 +82,7 @@ public class SpriteTextOutput implements TextOutput {
         }
     }
 
-    @Override
-    public void dismiss() {
+    private void dismiss() {
         graphics.pop();
         graphics.pop();
         input.pop();
@@ -101,6 +103,7 @@ public class SpriteTextOutput implements TextOutput {
             case READY_TO_END:
                 if (!activeInput.get().isEmpty()) {
                     clear();
+                    dismiss();
                     state = State.DISMISSED;
                     onEnd.accept(this);
                 }

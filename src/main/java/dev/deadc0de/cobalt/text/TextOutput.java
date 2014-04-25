@@ -7,6 +7,4 @@ public interface TextOutput extends Runnable {
     void print(String text);
 
     void print(String text, Consumer<TextOutput> onEnd);
-
-    void dismiss();
 }
