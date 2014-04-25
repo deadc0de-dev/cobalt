@@ -1,16 +1,17 @@
 package dev.deadc0de.cobalt.world;
 
-import dev.deadc0de.cobalt.Input;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class MainCharacterController {
 
     private final MainCharacterElement mainCharacter;
-    private final Input input;
+    private final Supplier<Set<ZoneInput>> input;
     private final ZoneEnvironment environment;
     private int row;
     private int column;
 
-    public MainCharacterController(MainCharacterElement mainCharacter, Input input, ZoneEnvironment environment, int initialRow, int initialColumn) {
+    public MainCharacterController(MainCharacterElement mainCharacter, Supplier<Set<ZoneInput>> input, ZoneEnvironment environment, int initialRow, int initialColumn) {
         this.mainCharacter = mainCharacter;
         this.input = input;
         this.environment = environment;
@@ -20,15 +21,16 @@ public class MainCharacterController {
 
     public void update() {
         if (mainCharacter.isIdle()) {
-            if (input.action()) {
+            final Set<ZoneInput> activeInput = input.get();
+            if (activeInput.contains(ZoneInput.ACTION)) {
                 getNearCell(mainCharacter.currentDirection()).action.run();
-            } else if (input.up()) {
+            } else if (activeInput.contains(ZoneInput.UP)) {
                 tryMove(Direction.UP, row - 1, column);
-            } else if (input.down()) {
+            } else if (activeInput.contains(ZoneInput.DOWN)) {
                 tryMove(Direction.DOWN, row + 1, column);
-            } else if (input.left()) {
+            } else if (activeInput.contains(ZoneInput.LEFT)) {
                 tryMove(Direction.LEFT, row, column - 1);
-            } else if (input.right()) {
+            } else if (activeInput.contains(ZoneInput.RIGHT)) {
                 tryMove(Direction.RIGHT, row, column + 1);
             }
         }

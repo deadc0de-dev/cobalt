@@ -1,27 +1,39 @@
 package dev.deadc0de.cobalt.text;
 
 import dev.deadc0de.cobalt.geometry.Point;
+import dev.deadc0de.cobalt.graphics.GraphicsFacade;
 import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.StationarySprite;
+import dev.deadc0de.cobalt.graphics.View;
+import dev.deadc0de.cobalt.input.InputFacade;
 import java.util.Arrays;
-import java.util.function.BooleanSupplier;
+import java.util.EnumSet;
+import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class SpriteTextOutput implements TextOutput {
 
-    private final BooleanSupplier forward;
+    private final InputFacade input;
+    private final GraphicsFacade graphics;
+    private final View view;
     private final String[][] lines;
     private final Sprite[][] sprites;
     private final StringBuilder buffer;
+    private Supplier<Set<TextInput>> activeInput;
+    private Runnable backgroundLayer;
+    private Runnable textLayer;
     private int currentLine;
     private int currentIndex;
     private int currentDelay;
     private State state;
     private Consumer<TextOutput> onEnd;
 
-    public SpriteTextOutput(BooleanSupplier forward) {
-        this.forward = forward;
+    public SpriteTextOutput(InputFacade input, GraphicsFacade graphics, View view) {
+        this.input = input;
+        this.graphics = graphics;
+        this.view = view;
         this.lines = new String[2][18];
         this.sprites = new Sprite[lines.length][];
         this.buffer = new StringBuilder();
@@ -56,6 +68,9 @@ public class SpriteTextOutput implements TextOutput {
     public void print(String text, Consumer<TextOutput> onEnd) {
         if (state == State.DISMISSED) {
             state = State.PRINTING;
+            activeInput = input.push(TextInput.class, () -> EnumSet.noneOf(TextInput.class));
+            backgroundLayer = graphics.pushImageLayer("text-background", view);
+            textLayer = graphics.pushSpritesLayer("text", this::sprites, view);
             currentLine = 0;
             currentIndex = 0;
             currentDelay = 0;
@@ -66,30 +81,40 @@ public class SpriteTextOutput implements TextOutput {
 
     @Override
     public void dismiss() {
+        graphics.pop();
+        graphics.pop();
+        input.pop();
         state = State.DISMISSED;
     }
 
-    public void update() {
+    @Override
+    public void run() {
+        if (state != State.DISMISSED) {
+            update();
+            backgroundLayer.run();
+            textLayer.run();
+        }
+    }
+
+    private void update() {
         switch (state) {
-            case DISMISSED:
-                return;
             case READY_TO_END:
-                if (forward.getAsBoolean()) {
+                if (!activeInput.get().isEmpty()) {
                     clear();
                     state = State.DISMISSED;
                     onEnd.accept(this);
                 }
                 return;
             case WAITING_TO_END:
-                if (!forward.getAsBoolean()) {
+                if (activeInput.get().isEmpty()) {
                     state = State.READY_TO_END;
                 }
                 return;
             case WAITING_TO_SCROLL:
-                if (forward.getAsBoolean()) {
-                    scroll();
+                if (activeInput.get().isEmpty()) {
+                    return;
                 }
-                return;
+                scroll();
             case FAST_PRINTING:
                 currentDelay--;
             case PRINTING:
@@ -117,7 +142,7 @@ public class SpriteTextOutput implements TextOutput {
             currentIndex = 0;
             currentLine++;
         }
-        state = forward.getAsBoolean() ? State.FAST_PRINTING : State.PRINTING;
+        state = activeInput.get().isEmpty() ? State.PRINTING : State.FAST_PRINTING;
     }
 
     private void scroll() {
@@ -131,7 +156,7 @@ public class SpriteTextOutput implements TextOutput {
         state = State.PRINTING;
     }
 
-    public Stream<Sprite> sprites() {
+    private Stream<Sprite> sprites() {
         return Stream.of(sprites).flatMap(Stream::of);
     }
 
@@ -142,6 +167,6 @@ public class SpriteTextOutput implements TextOutput {
         WAITING_TO_SCROLL,
         WAITING_TO_END,
         READY_TO_END,
-        DISMISSED
+        DISMISSED;
     }
 }

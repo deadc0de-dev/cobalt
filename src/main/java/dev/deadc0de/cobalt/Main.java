@@ -11,7 +11,10 @@ import dev.deadc0de.cobalt.graphics.View;
 import dev.deadc0de.cobalt.graphics.javafx.JavaFXGraphicsFacade;
 import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
+import dev.deadc0de.cobalt.input.KeyboardInputFacade;
 import dev.deadc0de.cobalt.text.SpriteTextOutput;
+import dev.deadc0de.cobalt.text.TextInput;
+import dev.deadc0de.cobalt.text.TextOutput;
 import dev.deadc0de.cobalt.world.Cell;
 import dev.deadc0de.cobalt.world.MainCharacterController;
 import dev.deadc0de.cobalt.world.MainCharacterElement;
@@ -19,13 +22,18 @@ import dev.deadc0de.cobalt.world.MutableElement;
 import dev.deadc0de.cobalt.world.PositionTracker;
 import dev.deadc0de.cobalt.world.Zone;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
+import dev.deadc0de.cobalt.world.ZoneInput;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.animation.Animation;
@@ -34,6 +42,7 @@ import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -46,20 +55,21 @@ public class Main extends Application {
     private static final Dimension RENDERING_AREA = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
 
     private final List<Runnable> updateHandlers = new ArrayList<>();
-    private final KeyboardInput input = new KeyboardInput();
     private final View view = new View(RENDERING_AREA);
-    private final SpriteTextOutput prompt;
     private final Function<String, Image> imagesRepository = imagesRepository();
     private final Function<String, Function<String, Region>> spritesRegionsRepository = spritesRegionsRepository();
+    private final KeyboardInputFacade input;
     private final StackPane root = new StackPane();
     private final GraphicsFacade graphics;
+    private final TextOutput prompt;
 
     public Main() {
-        prompt = new SpriteTextOutput(input::action);
-        updateHandlers.add(input::update);
-        updateHandlers.add(prompt::update);
+        input = inputFacade();
+        updateHandlers.add(input);
         graphics = new JavaFXGraphicsFacade(root.getChildren(), imagesRepository, spritesRegionsRepository);
         setupGraphics();
+        prompt = new SpriteTextOutput(input, graphics, new View(RENDERING_AREA));
+        updateHandlers.add(prompt);
     }
 
     public static void main(String... args) {
@@ -75,6 +85,33 @@ public class Main extends Application {
         stage.setTitle("Cobalt");
         startRendering();
         stage.show();
+    }
+
+    private KeyboardInputFacade inputFacade() {
+        final Map<Class<?>, Map<KeyCode, ?>> inputBindings = new HashMap<>();
+        inputBindings.put(ZoneInput.class, zoneInput());
+        inputBindings.put(TextInput.class, textInput());
+        return new KeyboardInputFacade(inputBindings);
+    }
+
+    private Map<KeyCode, ZoneInput> zoneInput() {
+        final Map<KeyCode, ZoneInput> bindings = new EnumMap<>(KeyCode.class);
+        bindings.put(KeyCode.W, ZoneInput.UP);
+        bindings.put(KeyCode.S, ZoneInput.DOWN);
+        bindings.put(KeyCode.A, ZoneInput.LEFT);
+        bindings.put(KeyCode.D, ZoneInput.RIGHT);
+        bindings.put(KeyCode.ENTER, ZoneInput.ACTION);
+        bindings.put(KeyCode.BACK_SPACE, ZoneInput.CANCEL);
+        bindings.put(KeyCode.SPACE, ZoneInput.PAUSE);
+        bindings.put(KeyCode.Z, ZoneInput.OPTIONAL);
+        return bindings;
+    }
+
+    private Map<KeyCode, TextInput> textInput() {
+        final Map<KeyCode, TextInput> bindings = new EnumMap<>(KeyCode.class);
+        bindings.put(KeyCode.ENTER, TextInput.FORWARD);
+        bindings.put(KeyCode.BACK_SPACE, TextInput.FORWARD);
+        return bindings;
     }
 
     private Function<String, Image> imagesRepository() {
@@ -101,9 +138,6 @@ public class Main extends Application {
         updateHandlers.add(graphics.pushImageLayer("pallet-town", view));
         updateHandlers.add(graphics.pushSpritesLayer("sprites", zone.sprites, view));
         updateHandlers.add(graphics.pushSpritesLayer("main-character", () -> Stream.of(mainCharacterSprite), view));
-        final View textView = new View(RENDERING_AREA);
-        graphics.pushImageLayer("text-background", textView);
-        updateHandlers.add(graphics.pushSpritesLayer("text", prompt::sprites, textView));
     }
 
     private Zone palletTown() {
@@ -187,7 +221,8 @@ public class Main extends Application {
             view.y += y;
         };
         final MainCharacterElement mainCharacterElement = new MainCharacterElement(mainCharacterSprite::setState, onCharacterMoved);
-        final MainCharacterController manager = new MainCharacterController(mainCharacterElement, input, environment, 9, 8);
+        final Supplier<Set<ZoneInput>> activeInputProvider = input.push(ZoneInput.class, () -> EnumSet.noneOf(ZoneInput.class));
+        final MainCharacterController manager = new MainCharacterController(mainCharacterElement, activeInputProvider, environment, 9, 8);
         updateHandlers.add(manager::update);
         return mainCharacterSprite;
     }
