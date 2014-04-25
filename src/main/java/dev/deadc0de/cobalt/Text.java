@@ -77,7 +77,24 @@ public class Text {
         sprites.put("-", new Region(new Point(232, 8), new Dimension(8, 8)));
         sprites.put("?", new Region(new Point(240, 8), new Dimension(8, 8)));
         sprites.put("!", new Region(new Point(248, 8), new Dimension(8, 8)));
-        sprites.put(" ", new Region(new Point(0, 16), new Dimension(8, 8)));
+        sprites.put("0", new Region(new Point(0, 16), new Dimension(8, 8)));
+        sprites.put("1", new Region(new Point(8, 16), new Dimension(8, 8)));
+        sprites.put("2", new Region(new Point(16, 16), new Dimension(8, 8)));
+        sprites.put("3", new Region(new Point(24, 16), new Dimension(8, 8)));
+        sprites.put("4", new Region(new Point(32, 16), new Dimension(8, 8)));
+        sprites.put("5", new Region(new Point(40, 16), new Dimension(8, 8)));
+        sprites.put("6", new Region(new Point(48, 16), new Dimension(8, 8)));
+        sprites.put("7", new Region(new Point(56, 16), new Dimension(8, 8)));
+        sprites.put("8", new Region(new Point(64, 16), new Dimension(8, 8)));
+        sprites.put("9", new Region(new Point(72, 16), new Dimension(8, 8)));
+        sprites.put(".", new Region(new Point(80, 16), new Dimension(8, 8)));
+        sprites.put("/", new Region(new Point(88, 16), new Dimension(8, 8)));
+        sprites.put(",", new Region(new Point(96, 16), new Dimension(8, 8)));
+        sprites.put("$", new Region(new Point(144, 16), new Dimension(8, 8)));
+        sprites.put("×", new Region(new Point(152, 16), new Dimension(8, 8)));
+        sprites.put("°", new Region(new Point(160, 16), new Dimension(8, 8)));
+        sprites.put("&", new Region(new Point(168, 16), new Dimension(8, 8)));
+        sprites.put(" ", new Region(new Point(248, 24), new Dimension(8, 8)));
         return sprites;
     }
 }

@@ -26,6 +26,7 @@ public class Sprites {
         sprites.put("sea-4", new Region(new Point(48, 0), new Dimension(16, 16)));
         sprites.put("sea-5", new Region(new Point(64, 0), new Dimension(16, 16)));
         sprites.put("sea-6", new Region(new Point(80, 0), new Dimension(16, 16)));
+        sprites.put("rock", new Region(new Point(256, 64), new Dimension(16, 16)));
         return sprites;
     }
 

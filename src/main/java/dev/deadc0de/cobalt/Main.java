@@ -160,10 +160,17 @@ public class Main extends Application {
                 seaPositions.add(new Point(c * TILE_SIZE - 8, r * TILE_SIZE - 8));
             }
         }
+        final List<Point> rockPositions = Arrays.asList(
+                new Point(13 * TILE_SIZE, 4 * TILE_SIZE),
+                new Point(14 * TILE_SIZE, 4 * TILE_SIZE),
+                new Point(5 * TILE_SIZE, 20 * TILE_SIZE),
+                new Point(6 * TILE_SIZE, 20 * TILE_SIZE)
+        );
         final List<Sprite> sprites = Stream.of(
                 flowersPositions.stream().map(position -> new StationarySprite(flower::state, position)),
-                seaPositions.stream().map(position -> new StationarySprite(sea::state, position)))
-                .reduce(Stream.empty(), Stream::concat).collect(Collectors.toList());
+                seaPositions.stream().map(position -> new StationarySprite(sea::state, position)),
+                rockPositions.stream().map(position -> new StationarySprite(() -> "rock", position))
+        ).reduce(Stream.empty(), Stream::concat).collect(Collectors.toList());
         final List<Runnable> updatables = Arrays.asList(() -> flowerAnimation.next().run(), () -> seaAnimation.next().run());
         final Zone palletTown = new Zone("pallet-town", sprites::stream, updatables::stream, environment());
         updateHandlers.add(() -> palletTown.updatables.get().forEach(Runnable::run));
@@ -176,6 +183,8 @@ public class Main extends Application {
         final Cell obstacle = new Cell("solid");
         final Cell water = new Cell("water");
         final Cell signboard = new Cell("signboard", () -> prompt.print("Under development:please retry      later!"));
+        final Cell lockedDoor = new Cell("locked-door", () -> prompt.print("It's locked."));
+        final Cell homeDoor = new Cell("home-door", () -> prompt.print("It's locked.", p -> p.print("Mom...")));
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
         fillRegion(enviroment, obstacle, new Region(new Point(6, 0), new Dimension(1, 4)));
         fillRegion(enviroment, obstacle, new Region(new Point(12, 0), new Dimension(1, 4)));
@@ -195,10 +204,13 @@ public class Main extends Application {
         fillRegion(enviroment, obstacle, new Region(new Point(7, 12), new Dimension(4, 1)));
         fillRegion(enviroment, obstacle, new Region(new Point(13, 11), new Dimension(6, 4)));
         fillRegion(enviroment, obstacle, new Region(new Point(13, 16), new Dimension(6, 1)));
-        fillRegion(enviroment, signboard, new Region(new Point(6, 8), new Dimension(1, 1)));
-        fillRegion(enviroment, signboard, new Region(new Point(14, 8), new Dimension(1, 1)));
-        fillRegion(enviroment, signboard, new Region(new Point(10, 12), new Dimension(1, 1)));
-        fillRegion(enviroment, signboard, new Region(new Point(16, 16), new Dimension(1, 1)));
+        enviroment.setAt(8, 6, signboard);
+        enviroment.setAt(8, 14, signboard);
+        enviroment.setAt(12, 10, signboard);
+        enviroment.setAt(16, 16, signboard);
+        enviroment.setAt(8, 16, lockedDoor);
+        enviroment.setAt(14, 15, lockedDoor);
+        enviroment.setAt(8, 8, homeDoor);
         return new ZoneEnvironment(enviroment, obstacle);
     }
 
