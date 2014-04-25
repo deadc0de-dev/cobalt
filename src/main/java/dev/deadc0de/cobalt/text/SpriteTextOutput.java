@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 
 public class SpriteTextOutput implements TextOutput {
 
+    private static final String SCROLL = "↓";
+    private static final String DISMISS = "»";
     private static final Consumer<TextOutput> NOOP = textOutput -> {
     };
 
@@ -30,6 +32,7 @@ public class SpriteTextOutput implements TextOutput {
     private int currentLine;
     private int currentIndex;
     private int currentDelay;
+    private int blinkDelay;
     private State state;
     private Consumer<TextOutput> onEnd;
 
@@ -77,6 +80,7 @@ public class SpriteTextOutput implements TextOutput {
             currentLine = 0;
             currentIndex = 0;
             currentDelay = 0;
+            blinkDelay = 0;
             buffer.append(text);
             this.onEnd = onEnd;
         }
@@ -106,14 +110,24 @@ public class SpriteTextOutput implements TextOutput {
                     dismiss();
                     state = State.DISMISSED;
                     onEnd.accept(this);
+                    return;
                 }
-                return;
             case WAITING_TO_END:
+                blinkDelay--;
+                if (blinkDelay <= 0) {
+                    lines[1][17] = lines[1][17] == DISMISS ? " " : DISMISS;
+                    blinkDelay = 16;
+                }
                 if (activeInput.get().isEmpty()) {
                     state = State.READY_TO_END;
                 }
                 return;
             case WAITING_TO_SCROLL:
+                blinkDelay--;
+                if (blinkDelay <= 0) {
+                    lines[1][17] = lines[1][17] == SCROLL ? " " : SCROLL;
+                    blinkDelay = 16;
+                }
                 if (activeInput.get().isEmpty()) {
                     return;
                 }
@@ -149,6 +163,7 @@ public class SpriteTextOutput implements TextOutput {
     }
 
     private void scroll() {
+        lines[1][17] = " ";
         final String[] firstLine = lines[0];
         for (int i = 0; i < lines.length - 1; i++) {
             lines[i] = lines[i + 1];

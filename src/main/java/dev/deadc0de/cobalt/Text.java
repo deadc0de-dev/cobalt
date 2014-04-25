@@ -90,6 +90,9 @@ public class Text {
         sprites.put(".", new Region(new Point(80, 16), new Dimension(8, 8)));
         sprites.put("/", new Region(new Point(88, 16), new Dimension(8, 8)));
         sprites.put(",", new Region(new Point(96, 16), new Dimension(8, 8)));
+        sprites.put("»", new Region(new Point(104, 16), new Dimension(8, 8)));
+        sprites.put("→", new Region(new Point(112, 16), new Dimension(8, 8)));
+        sprites.put("↓", new Region(new Point(120, 16), new Dimension(8, 8)));
         sprites.put("$", new Region(new Point(144, 16), new Dimension(8, 8)));
         sprites.put("×", new Region(new Point(152, 16), new Dimension(8, 8)));
         sprites.put("°", new Region(new Point(160, 16), new Dimension(8, 8)));
