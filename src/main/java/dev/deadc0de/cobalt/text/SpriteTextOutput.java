@@ -152,14 +152,25 @@ public class SpriteTextOutput implements TextOutput {
             state = State.WAITING_TO_SCROLL;
             return;
         }
-        final String letter = buffer.substring(0, 1);
+        String letter = buffer.substring(0, 1);
+        if (letter.equals("\n")) {
+            buffer.deleteCharAt(0);
+            lineFeed();
+            printNextGlyph();
+            return;
+        } else if (currentIndex == lines[currentLine].length - 1) {
+            lineFeed();
+            printNextGlyph();
+            return;
+        }
         buffer.deleteCharAt(0);
         lines[currentLine][currentIndex++] = letter;
-        if (currentIndex == lines[currentLine].length) {
-            currentIndex = 0;
-            currentLine++;
-        }
         state = activeInput.get().isEmpty() ? State.PRINTING : State.FAST_PRINTING;
+    }
+
+    private void lineFeed() {
+        currentIndex = 0;
+        currentLine++;
     }
 
     private void scroll() {

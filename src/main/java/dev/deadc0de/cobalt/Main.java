@@ -61,15 +61,15 @@ public class Main extends Application {
     private final KeyboardInputFacade input;
     private final StackPane root = new StackPane();
     private final GraphicsFacade graphics;
-    private final TextOutput prompt;
+    private final TextOutput textOutput;
 
     public Main() {
         input = inputFacade();
         updateHandlers.add(input);
         graphics = new JavaFXGraphicsFacade(root.getChildren(), imagesRepository, spritesRegionsRepository);
         setupGraphics();
-        prompt = new SpriteTextOutput(input, graphics, new View(RENDERING_AREA));
-        updateHandlers.add(prompt);
+        textOutput = new SpriteTextOutput(input, graphics, new View(RENDERING_AREA));
+        updateHandlers.add(textOutput);
     }
 
     public static void main(String... args) {
@@ -182,9 +182,10 @@ public class Main extends Application {
         final Cell ground = new Cell("ground");
         final Cell obstacle = new Cell("solid");
         final Cell water = new Cell("water");
-        final Cell signboard = new Cell("signboard", () -> prompt.print("Under development:please retry      later!"));
-        final Cell lockedDoor = new Cell("locked-door", () -> prompt.print("It's locked."));
-        final Cell homeDoor = new Cell("home-door", () -> prompt.print("It's locked.", p -> p.print("Mom...")));
+        final Cell signboard = new Cell("signboard", () -> textOutput.print("Under\ndevelopment:\nplease retry\nlater."));
+        final Cell lockedDoor = new Cell("locked-door", () -> textOutput.print("It's locked."));
+        final Cell labDoor = new Cell("lab-door", () -> textOutput.print("It's locked.", t -> t.print("There's a note on\nthe door:\n32.5°N...\nThe rest is torn\naway.")));
+        final Cell homeDoor = new Cell("home-door", () -> textOutput.print("It's locked.", t -> t.print("Mom...")));
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
         fillRegion(enviroment, obstacle, new Region(new Point(6, 0), new Dimension(1, 4)));
         fillRegion(enviroment, obstacle, new Region(new Point(12, 0), new Dimension(1, 4)));
@@ -209,7 +210,7 @@ public class Main extends Application {
         enviroment.setAt(12, 10, signboard);
         enviroment.setAt(16, 16, signboard);
         enviroment.setAt(8, 16, lockedDoor);
-        enviroment.setAt(14, 15, lockedDoor);
+        enviroment.setAt(14, 15, labDoor);
         enviroment.setAt(8, 8, homeDoor);
         return new ZoneEnvironment(enviroment, obstacle);
     }
