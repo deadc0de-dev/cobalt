@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 public interface TextOutput extends Runnable {
 
-    void print(String text);
+    void print(String... messages);
 
-    void print(String text, Consumer<TextOutput> onEnd);
+    void print(String message, Consumer<TextOutput> onEnd);
 }

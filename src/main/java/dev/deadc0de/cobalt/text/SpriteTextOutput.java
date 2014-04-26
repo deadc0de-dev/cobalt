@@ -8,6 +8,7 @@ import dev.deadc0de.cobalt.graphics.View;
 import dev.deadc0de.cobalt.input.InputFacade;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -66,12 +67,18 @@ public class SpriteTextOutput implements TextOutput {
     }
 
     @Override
-    public void print(String text) {
-        print(text, NOOP);
+    public void print(String... messages) {
+        print(Arrays.asList(messages).iterator());
+    }
+
+    private void print(Iterator<String> messages) {
+        if (messages.hasNext()) {
+            print(messages.next(), output -> print(messages));
+        }
     }
 
     @Override
-    public void print(String text, Consumer<TextOutput> onEnd) {
+    public void print(String message, Consumer<TextOutput> onEnd) {
         if (state == State.DISMISSED) {
             state = State.PRINTING;
             activeInput = input.push(TextInput.class, () -> EnumSet.noneOf(TextInput.class));
@@ -81,7 +88,7 @@ public class SpriteTextOutput implements TextOutput {
             currentIndex = 0;
             currentDelay = 0;
             blinkDelay = 0;
-            buffer.append(text);
+            buffer.append(message);
             this.onEnd = onEnd;
         }
     }

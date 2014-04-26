@@ -184,8 +184,8 @@ public class Main extends Application {
         final Cell water = new Cell("water");
         final Cell signboard = new Cell("signboard", () -> textOutput.print("Under\ndevelopment:\nplease retry\nlater."));
         final Cell lockedDoor = new Cell("locked-door", () -> textOutput.print("It's locked."));
-        final Cell labDoor = new Cell("lab-door", () -> textOutput.print("It's locked.", t -> t.print("There's a note on\nthe door:\n32.5°N...\nThe rest is torn\naway.")));
-        final Cell homeDoor = new Cell("home-door", () -> textOutput.print("It's locked.", t -> t.print("Mom...")));
+        final Cell labDoor = new Cell("lab-door", () -> textOutput.print("It's locked.", "There's a note on\nthe door:\n32.5°N...", "The rest is torn\naway."));
+        final Cell homeDoor = new Cell("home-door", () -> textOutput.print("It's locked.", "Mom..."));
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
         fillRegion(enviroment, obstacle, new Region(new Point(6, 0), new Dimension(1, 4)));
         fillRegion(enviroment, obstacle, new Region(new Point(12, 0), new Dimension(1, 4)));
