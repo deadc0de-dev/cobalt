@@ -100,17 +100,17 @@ public class Main extends Application {
         bindings.put(KeyCode.S, ZoneInput.DOWN);
         bindings.put(KeyCode.A, ZoneInput.LEFT);
         bindings.put(KeyCode.D, ZoneInput.RIGHT);
-        bindings.put(KeyCode.ENTER, ZoneInput.ACTION);
-        bindings.put(KeyCode.BACK_SPACE, ZoneInput.CANCEL);
+        bindings.put(KeyCode.K, ZoneInput.ACTION);
+        bindings.put(KeyCode.M, ZoneInput.CANCEL);
         bindings.put(KeyCode.SPACE, ZoneInput.PAUSE);
-        bindings.put(KeyCode.Z, ZoneInput.OPTIONAL);
+        bindings.put(KeyCode.C, ZoneInput.OPTIONAL);
         return bindings;
     }
 
     private Map<KeyCode, TextInput> textInput() {
         final Map<KeyCode, TextInput> bindings = new EnumMap<>(KeyCode.class);
-        bindings.put(KeyCode.ENTER, TextInput.FORWARD);
-        bindings.put(KeyCode.BACK_SPACE, TextInput.FORWARD);
+        bindings.put(KeyCode.K, TextInput.FORWARD);
+        bindings.put(KeyCode.M, TextInput.FORWARD);
         return bindings;
     }
 
