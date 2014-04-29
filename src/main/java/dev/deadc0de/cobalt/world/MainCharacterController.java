@@ -10,6 +10,7 @@ public class MainCharacterController {
     private final ZoneEnvironment environment;
     private int row;
     private int column;
+    private Direction lastDirection;
 
     public MainCharacterController(MainCharacterElement mainCharacter, Supplier<Set<ZoneInput>> input, ZoneEnvironment environment, int initialRow, int initialColumn) {
         this.mainCharacter = mainCharacter;
@@ -24,14 +25,21 @@ public class MainCharacterController {
             final Set<ZoneInput> activeInput = input.get();
             if (activeInput.contains(ZoneInput.ACTION)) {
                 getNearCell(mainCharacter.currentDirection()).action.run();
+                lastDirection = null;
             } else if (activeInput.contains(ZoneInput.UP)) {
                 tryMove(Direction.UP, row - 1, column);
+                lastDirection = Direction.UP;
             } else if (activeInput.contains(ZoneInput.DOWN)) {
                 tryMove(Direction.DOWN, row + 1, column);
+                lastDirection = Direction.DOWN;
             } else if (activeInput.contains(ZoneInput.LEFT)) {
                 tryMove(Direction.LEFT, row, column - 1);
+                lastDirection = Direction.LEFT;
             } else if (activeInput.contains(ZoneInput.RIGHT)) {
                 tryMove(Direction.RIGHT, row, column + 1);
+                lastDirection = Direction.RIGHT;
+            } else {
+                lastDirection = null;
             }
         }
         mainCharacter.update();
@@ -53,6 +61,10 @@ public class MainCharacterController {
     }
 
     private void tryMove(Direction direction, int targetRow, int targetColumn) {
+        if (lastDirection == null) {
+            mainCharacter.turn(direction);
+            return;
+        }
         if (environment.getCellAt(targetRow, targetColumn).type.equals("ground")) {
             mainCharacter.move(direction);
             row = targetRow;
