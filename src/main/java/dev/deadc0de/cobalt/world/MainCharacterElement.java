@@ -10,7 +10,7 @@ import java.util.function.Consumer;
 public class MainCharacterElement {
 
     private static final int STEP_LENGTH = 4;
-    private static final int MOVE_DELAY = 2;
+    private static final int MOVE_DELAY = 1;
 
     private final Map<Direction, Iterable<Runnable>> turnAnimations;
     private final Map<Direction, Map<Step, Iterable<Runnable>>> moveAnimations;

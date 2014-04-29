@@ -13,6 +13,7 @@ import javafx.scene.image.Image;
 public class Sprites {
 
     public static final Image SPRITES = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/world.png"));
+    private static final int ANIMATION_DELAY = 8;
 
     public static Map<String, Region> spritesRegions() {
         final Map<String, Region> sprites = new HashMap<>();
@@ -32,34 +33,34 @@ public class Sprites {
     public static Iterable<Runnable> flower(Consumer<String> stateTracker) {
         return LoopAnimation.indefinite(AnimationBuilder.startWith(stateTracker)
                 .run(state -> state.accept("flower-1"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("flower-2"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("flower-3"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("flower-4"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .end());
     }
 
     public static Iterable<Runnable> sea(Consumer<String> stateTracker) {
         return LoopAnimation.indefinite(AnimationBuilder.startWith(stateTracker)
                 .run(state -> state.accept("sea-1"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("sea-2"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("sea-3"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("sea-4"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("sea-5"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("sea-4"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("sea-3"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .run(state -> state.accept("sea-2"))
-                .sleep(9)
+                .sleep(ANIMATION_DELAY)
                 .end());
     }
 }
