@@ -10,15 +10,15 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class SpriteTextOutput implements TextOutput {
+public class SpriteTextFacade implements TextFacade {
 
-    private static final String SCROLL = "↓";
-    private static final String DISMISS = "»";
-    private static final Consumer<TextOutput> NOOP = textOutput -> {
+    private static final int PRINTING_DELAY = 2;
+    private static final String SCROLL_GLYPH = "↓";
+    private static final int SCROLL_BLINK_DURATION = 16;
+    private static final Runnable NOOP = () -> {
     };
 
     private final InputFacade input;
@@ -32,12 +32,12 @@ public class SpriteTextOutput implements TextOutput {
     private Runnable textLayer;
     private int currentLine;
     private int currentIndex;
-    private int currentDelay;
+    private int printingDelay;
     private int blinkDelay;
     private State state;
-    private Consumer<TextOutput> onEnd;
+    private Runnable onEnd;
 
-    public SpriteTextOutput(InputFacade input, GraphicsFacade graphics, View view) {
+    public SpriteTextFacade(InputFacade input, GraphicsFacade graphics, View view) {
         this.input = input;
         this.graphics = graphics;
         this.view = view;
@@ -71,22 +71,47 @@ public class SpriteTextOutput implements TextOutput {
         print(Arrays.asList(messages).iterator());
     }
 
-    private void print(Iterator<String> messages) {
-        if (messages.hasNext()) {
-            print(messages.next(), output -> print(messages));
-        }
+    @Override
+    public void print(Iterator<String> messages) {
+        printAndThen(NOOP, messages);
     }
 
     @Override
-    public void print(String message, Consumer<TextOutput> onEnd) {
+    public void printAndThen(Runnable onEnd, String... messages) {
+        printAndThen(onEnd, Arrays.asList(messages).iterator());
+    }
+
+    @Override
+    public void printAndThen(Runnable onEnd, Iterator<String> messages) {
+        chainPrintCalls(() -> {
+            onEnd.run();
+            this.dismiss();
+        }, messages);
+    }
+
+    private void chainPrintCalls(Runnable onEnd, Iterator<String> messages) {
+        if (messages.hasNext()) {
+            final String message = messages.next();
+            if (messages.hasNext()) {
+                print(message, () -> this.chainPrintCalls(onEnd, messages));
+            } else {
+                print(message, onEnd);
+            }
+        }
+    }
+
+    private void print(String message, Runnable onEnd) {
         if (state == State.DISMISSED) {
-            state = State.PRINTING;
             activeInput = input.push(TextInput.class, () -> EnumSet.noneOf(TextInput.class));
             backgroundLayer = graphics.pushImageLayer("text-background", view);
             textLayer = graphics.pushSpritesLayer("text", this::sprites, view);
+        }
+        if (state == State.DISMISSED || state == State.ENDED) {
+            state = State.PRINTING;
+            clear();
             currentLine = 0;
             currentIndex = 0;
-            currentDelay = 0;
+            printingDelay = 0;
             blinkDelay = 0;
             buffer.append(message);
             this.onEnd = onEnd;
@@ -111,52 +136,45 @@ public class SpriteTextOutput implements TextOutput {
 
     private void update() {
         switch (state) {
-            case READY_TO_END:
-                if (!activeInput.get().isEmpty()) {
-                    clear();
-                    dismiss();
-                    state = State.DISMISSED;
-                    onEnd.accept(this);
-                    return;
+            case ENDED:
+                onEnd.run();
+                return;
+            case READY_TO_ADVANCE:
+                if (activeInput.get().contains(TextInput.FORWARD)) {
+                    if (buffer.length() == 0) {
+                        state = State.ENDED;
+                        return;
+                    }
+                    scroll();
                 }
-            case WAITING_TO_END:
-                blinkDelay--;
-                if (blinkDelay <= 0) {
-                    lines[1][17] = lines[1][17] == DISMISS ? " " : DISMISS;
-                    blinkDelay = 16;
-                }
+            case WAITING_TO_ADVANCE:
+                updateBlinkingScroll();
                 if (activeInput.get().isEmpty()) {
-                    state = State.READY_TO_END;
+                    state = State.READY_TO_ADVANCE;
                 }
                 return;
-            case WAITING_TO_SCROLL:
-                blinkDelay--;
-                if (blinkDelay <= 0) {
-                    lines[1][17] = lines[1][17] == SCROLL ? " " : SCROLL;
-                    blinkDelay = 16;
-                }
-                if (activeInput.get().isEmpty()) {
-                    return;
-                }
-                scroll();
             case FAST_PRINTING:
-                currentDelay--;
+                printingDelay--;
             case PRINTING:
-                currentDelay--;
-                if (currentDelay <= 0) {
+                printingDelay--;
+                if (printingDelay <= 0) {
                     printNextGlyph();
-                    currentDelay = 4;
+                    printingDelay = PRINTING_DELAY;
                 }
         }
     }
 
-    private void printNextGlyph() {
-        if (buffer.length() == 0) {
-            state = State.WAITING_TO_END;
-            return;
+    private void updateBlinkingScroll() {
+        blinkDelay--;
+        if (blinkDelay <= 0) {
+            lines[1][17] = lines[1][17] == SCROLL_GLYPH ? " " : SCROLL_GLYPH;
+            blinkDelay = SCROLL_BLINK_DURATION;
         }
-        if (currentLine == lines.length) {
-            state = State.WAITING_TO_SCROLL;
+    }
+
+    private void printNextGlyph() {
+        if (buffer.length() == 0 || currentLine == lines.length) {
+            state = State.WAITING_TO_ADVANCE;
             return;
         }
         String letter = buffer.substring(0, 1);
@@ -200,9 +218,9 @@ public class SpriteTextOutput implements TextOutput {
 
         PRINTING,
         FAST_PRINTING,
-        WAITING_TO_SCROLL,
-        WAITING_TO_END,
-        READY_TO_END,
+        WAITING_TO_ADVANCE,
+        READY_TO_ADVANCE,
+        ENDED,
         DISMISSED;
     }
 }

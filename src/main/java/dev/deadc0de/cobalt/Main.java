@@ -12,9 +12,9 @@ import dev.deadc0de.cobalt.graphics.javafx.JavaFXGraphicsFacade;
 import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.input.KeyboardInputFacade;
-import dev.deadc0de.cobalt.text.SpriteTextOutput;
+import dev.deadc0de.cobalt.text.SpriteTextFacade;
 import dev.deadc0de.cobalt.text.TextInput;
-import dev.deadc0de.cobalt.text.TextOutput;
+import dev.deadc0de.cobalt.text.TextFacade;
 import dev.deadc0de.cobalt.world.Cell;
 import dev.deadc0de.cobalt.world.MainCharacterController;
 import dev.deadc0de.cobalt.world.MainCharacterElement;
@@ -61,15 +61,15 @@ public class Main extends Application {
     private final KeyboardInputFacade input;
     private final StackPane root = new StackPane();
     private final GraphicsFacade graphics;
-    private final TextOutput textOutput;
+    private final TextFacade textFacade;
 
     public Main() {
         input = inputFacade();
         updateHandlers.add(input);
         graphics = new JavaFXGraphicsFacade(root.getChildren(), imagesRepository, spritesRegionsRepository);
         setupGraphics();
-        textOutput = new SpriteTextOutput(input, graphics, new View(RENDERING_AREA));
-        updateHandlers.add(textOutput);
+        textFacade = new SpriteTextFacade(input, graphics, new View(RENDERING_AREA));
+        updateHandlers.add(textFacade);
     }
 
     public static void main(String... args) {
@@ -182,10 +182,10 @@ public class Main extends Application {
         final Cell ground = new Cell("ground");
         final Cell obstacle = new Cell("solid");
         final Cell water = new Cell("water");
-        final Cell signboard = new Cell("signboard", () -> textOutput.print("Under\ndevelopment:\nplease retry\nlater."));
-        final Cell lockedDoor = new Cell("locked-door", () -> textOutput.print("It's locked."));
-        final Cell labDoor = new Cell("lab-door", () -> textOutput.print("It's locked.", "There's a note on\nthe door:\n32.5°N...", "The rest is torn\naway."));
-        final Cell homeDoor = new Cell("home-door", () -> textOutput.print("It's locked.", "Mom..."));
+        final Cell signboard = new Cell("signboard", () -> textFacade.print("Under\ndevelopment:\nplease retry\nlater."));
+        final Cell lockedDoor = new Cell("locked-door", () -> textFacade.print("It's locked."));
+        final Cell labDoor = new Cell("lab-door", () -> textFacade.print("It's locked.", "There's a note on\nthe door:\n32.5°N...", "The rest is torn\naway."));
+        final Cell homeDoor = new Cell("home-door", () -> textFacade.print("It's locked.", "Mom..."));
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
         fillRegion(enviroment, obstacle, new Region(new Point(6, 0), new Dimension(1, 4)));
         fillRegion(enviroment, obstacle, new Region(new Point(12, 0), new Dimension(1, 4)));
