@@ -9,7 +9,10 @@ import javafx.scene.image.Image;
 
 public class Text {
 
+    public static final String GROUP_NAME = "text";
     public static final Image SPRITES = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/text.png"));
+    public static final String BACKGROUND_NAME = "text-background";
+    public static final Image BACKGROUND = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/text_background.png"));
 
     public static Map<String, Region> spritesRegions() {
         final Map<String, Region> sprites = new HashMap<>();

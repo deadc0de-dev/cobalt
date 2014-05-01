@@ -7,13 +7,17 @@ import java.util.stream.Stream;
 public class Zone {
 
     public final String name;
-    public final Supplier<Stream<Sprite>> sprites;
+    public final String backgroundName;
+    public final String spritesGroup;
+    public final Supplier<Stream<Sprite>> spritesSource;
     public final Supplier<Stream<Runnable>> updatables;
     public final ZoneEnvironment environment;
 
-    public Zone(String name, Supplier<Stream<Sprite>> sprites, Supplier<Stream<Runnable>> updatables, ZoneEnvironment environment) {
+    public Zone(String name, String backgroundName, String spritesGroup, Supplier<Stream<Sprite>> spritesSource, Supplier<Stream<Runnable>> updatables, ZoneEnvironment environment) {
         this.name = name;
-        this.sprites = sprites;
+        this.backgroundName = backgroundName;
+        this.spritesGroup = spritesGroup;
+        this.spritesSource = spritesSource;
         this.updatables = updatables;
         this.environment = environment;
     }

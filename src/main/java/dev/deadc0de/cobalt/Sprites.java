@@ -12,7 +12,8 @@ import javafx.scene.image.Image;
 
 public class Sprites {
 
-    public static final Image SPRITES = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/world.png"));
+    public static final String GROUP_NAME = "sprites";
+    public static final Image SPRITES = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/sprites.png"));
     private static final int ANIMATION_DELAY = 8;
 
     public static Map<String, Region> spritesRegions() {

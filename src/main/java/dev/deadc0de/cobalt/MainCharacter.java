@@ -9,6 +9,7 @@ import javafx.scene.image.Image;
 
 public class MainCharacter {
 
+    public static final String GROUP_NAME = "main-character";
     public static final Image SPRITES = new Image(Main.class.getResourceAsStream("/dev/deadc0de/cobalt/images/main_character.png"));
 
     public static Map<String, Region> spritesRegions() {
