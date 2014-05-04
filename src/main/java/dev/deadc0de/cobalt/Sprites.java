@@ -31,6 +31,12 @@ public class Sprites {
         return sprites;
     }
 
+    public static Map<String, Image> spritesImages() {
+        final Map<String, Image> images = new HashMap<>();
+        spritesRegions().keySet().forEach(name -> images.put(name, SPRITES));
+        return images;
+    }
+
     public static Iterable<Runnable> flower(Consumer<String> stateTracker) {
         return LoopAnimation.indefinite(AnimationBuilder.startWith(stateTracker)
                 .run(state -> state.accept("flower-1"))

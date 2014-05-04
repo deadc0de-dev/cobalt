@@ -4,21 +4,25 @@ import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 
-public class View {
+public interface View {
 
-    public int x;
-    public int y;
-    public final Dimension size;
+    int x();
 
-    public View(Dimension size) {
-        this.size = size;
+    int y();
+
+    int width();
+
+    int height();
+
+    default Point position() {
+        return new Point(x(), y());
     }
 
-    public Point position() {
-        return new Point(x, y);
+    default Dimension size() {
+        return new Dimension(width(), height());
     }
 
-    public Region region() {
-        return new Region(position(), size);
+    default Region region() {
+        return new Region(position(), size());
     }
 }

@@ -1,7 +1,10 @@
 package dev.deadc0de.cobalt.world;
 
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.graphics.GraphicsFacade;
+import dev.deadc0de.cobalt.graphics.OverlayingSpritesLayer;
+import dev.deadc0de.cobalt.graphics.RenderingLayer;
+import dev.deadc0de.cobalt.graphics.RenderingStack;
+import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.View;
 import dev.deadc0de.cobalt.text.TextFacade;
 import java.util.HashMap;
@@ -9,21 +12,24 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import javafx.scene.image.Image;
 
 public class World {
 
     private final Map<String, Zone> zones;
-    private final GraphicsFacade graphics;
+    private final RenderingStack graphics;
+    private final Function<ZoneEnvironment, Sprite> mainCharacterSpriteFactory;
     private Zone currentZone;
 
-    public World(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Function<String, Region>> spritesRegionsRepository, GraphicsFacade graphics) {
+    public World(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository, RenderingStack graphics, Function<ZoneEnvironment, Sprite> mainCharacterSpriteFactory) {
         zones = new HashMap<>();
         this.graphics = graphics;
+        this.mainCharacterSpriteFactory = mainCharacterSpriteFactory;
         loadZones(textFacade, imagesRepository, spritesRegionsRepository);
     }
 
-    private void loadZones(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Function<String, Region>> spritesRegionsRepository) {
+    private void loadZones(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
         final Iterable<ZoneFactory> zoneFactories = ServiceLoader.load(ZoneFactory.class);
         for (ZoneFactory zoneFactory : zoneFactories) {
             final Zone zone = zoneFactory.createZone(textFacade, imagesRepository, spritesRegionsRepository);
@@ -36,20 +42,18 @@ public class World {
             popZone();
         }
         currentZone = zones.get(name);
-        final Runnable backgroundLayer = graphics.pushImageLayer(currentZone.backgroundName, view);
-        final Runnable spritesLayer = graphics.pushSpritesLayer(currentZone.spritesGroup, currentZone.spritesSource, view);
+        final Sprite mainCharacterSprite = mainCharacterSpriteFactory.apply(currentZone.environment);
+        final RenderingLayer layer = new OverlayingSpritesLayer(new ZoneRenderingLayer(currentZone), () -> Stream.of(mainCharacterSprite));
+        graphics.pushLayer(layer, view);
         final Zone zoneReference = currentZone;
         return () -> {
             zoneReference.updatables.get().forEach(Runnable::run);
-            backgroundLayer.run();
-            spritesLayer.run();
         };
     }
 
     private void popZone() {
         currentZone = null;
-        graphics.pop();
-        graphics.pop();
+        graphics.popLayer();
     }
 
     public Zone currentZone() {

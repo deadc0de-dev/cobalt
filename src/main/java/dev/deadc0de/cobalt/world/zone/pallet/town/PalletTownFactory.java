@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.scene.image.Image;
@@ -31,7 +30,7 @@ public class PalletTownFactory implements ZoneFactory {
     private static final String BACKGROUND_NAME = "pallet-town-background";
 
     @Override
-    public Zone createZone(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Function<String, Region>> spritesRegionsRepository) {
+    public Zone createZone(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
         addResources(imagesRepository, spritesRegionsRepository);
         final MutableElement flower = new MutableElement();
         final Iterator<Runnable> flowerAnimation = Sprites.flower(flower::setState).iterator();
@@ -64,11 +63,11 @@ public class PalletTownFactory implements ZoneFactory {
                 rockPositions.stream().map(position -> new StationarySprite(() -> "rock", position))
         ).reduce(Stream.empty(), Stream::concat).collect(Collectors.toList());
         final List<Runnable> updatables = Arrays.asList(() -> flowerAnimation.next().run(), () -> seaAnimation.next().run());
-        final Zone palletTown = new Zone(NAME, BACKGROUND_NAME, Sprites.GROUP_NAME, sprites::stream, updatables::stream, environment(textFacade));
+        final Zone palletTown = new Zone(NAME, BACKGROUND_NAME, sprites::stream, updatables::stream, environment(textFacade));
         return palletTown;
     }
 
-    private void addResources(BiConsumer<String, Image> imagesRepository, BiConsumer<String, Function<String, Region>> spritesRegionsRepository) {
+    private void addResources(BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
         imagesRepository.accept(BACKGROUND_NAME, new Image(PalletTownFactory.class.getResourceAsStream("/dev/deadc0de/cobalt/world/zone/pallet/town/pallet_town.png")));
     }
 

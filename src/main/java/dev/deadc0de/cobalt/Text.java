@@ -103,4 +103,10 @@ public class Text {
         sprites.put(" ", new Region(new Point(248, 24), new Dimension(8, 8)));
         return sprites;
     }
+
+    public static Map<String, Image> spritesImages() {
+        final Map<String, Image> images = new HashMap<>();
+        spritesRegions().keySet().forEach(name -> images.put(name, SPRITES));
+        return images;
+    }
 }

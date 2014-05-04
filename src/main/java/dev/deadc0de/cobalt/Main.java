@@ -3,15 +3,14 @@ package dev.deadc0de.cobalt;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.graphics.GraphicsFacade;
+import dev.deadc0de.cobalt.graphics.ImmutableView;
+import dev.deadc0de.cobalt.graphics.MovableView;
 import dev.deadc0de.cobalt.graphics.MutableSprite;
 import dev.deadc0de.cobalt.graphics.Sprite;
-import dev.deadc0de.cobalt.graphics.View;
-import dev.deadc0de.cobalt.graphics.javafx.JavaFXGraphicsFacade;
+import dev.deadc0de.cobalt.graphics.javafx.JavaFXRenderingStack;
 import dev.deadc0de.cobalt.input.KeyboardInputFacade;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
 import dev.deadc0de.cobalt.text.TextInput;
-import dev.deadc0de.cobalt.text.TextFacade;
 import dev.deadc0de.cobalt.world.MainCharacterController;
 import dev.deadc0de.cobalt.world.MainCharacterElement;
 import dev.deadc0de.cobalt.world.PositionTracker;
@@ -25,9 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -47,23 +44,24 @@ public class Main extends Application {
     private static final Dimension RENDERING_AREA = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
 
     private final List<Runnable> updateHandlers = new ArrayList<>();
-    private final View view = new View(RENDERING_AREA);
+    private final MovableView view = new MovableView(0, 0, RENDERING_AREA);
     private final Map<String, Image> imagesRepository = imagesRepository();
-    private final Map<String, Function<String, Region>> spritesRegionsRepository = spritesRegionsRepository();
+    private final Map<String, Region> spritesRegionsRepository = spritesRegionsRepository();
     private final KeyboardInputFacade input;
     private final StackPane root = new StackPane();
-    private final GraphicsFacade graphics;
-    private final TextFacade textFacade;
+    private final JavaFXRenderingStack graphics;
+    private final SpriteTextFacade textFacade;
     private final World world;
 
     public Main() {
         input = inputFacade();
         updateHandlers.add(input);
-        graphics = new JavaFXGraphicsFacade(root.getChildren(), imagesRepository::get, spritesRegionsRepository::get);
-        textFacade = new SpriteTextFacade(input, graphics, new View(RENDERING_AREA));
-        updateHandlers.add(textFacade);
-        world = new World(textFacade, imagesRepository::put, spritesRegionsRepository::put, graphics);
-        setup();
+        graphics = new JavaFXRenderingStack(root.getChildren(), imagesRepository::get, spritesRegionsRepository::get);
+        textFacade = new SpriteTextFacade(graphics, new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)), input);
+        updateHandlers.add(textFacade::update);
+        world = new World(textFacade, imagesRepository::put, spritesRegionsRepository::put, graphics, this::mainCharacterEnvironment);
+        updateHandlers.add(world.pushZone("pallet-town", view));
+        updateHandlers.add(graphics::update);
     }
 
     public static void main(String... args) {
@@ -112,23 +110,20 @@ public class Main extends Application {
         final Map<String, Image> repository = new HashMap();
         repository.put(Text.BACKGROUND_NAME, Text.BACKGROUND);
         repository.put(Text.GROUP_NAME, Text.SPRITES);
+        repository.putAll(Text.spritesImages());
         repository.put(Sprites.GROUP_NAME, Sprites.SPRITES);
+        repository.putAll(Sprites.spritesImages());
         repository.put(MainCharacter.GROUP_NAME, MainCharacter.SPRITES);
+        repository.putAll(MainCharacter.spritesImages());
         return repository;
     }
 
-    private Map<String, Function<String, Region>> spritesRegionsRepository() {
-        final Map<String, Function<String, Region>> repository = new HashMap();
-        repository.put(Text.GROUP_NAME, Text.spritesRegions()::get);
-        repository.put(Sprites.GROUP_NAME, Sprites.spritesRegions()::get);
-        repository.put(MainCharacter.GROUP_NAME, MainCharacter.spritesRegions()::get);
+    private Map<String, Region> spritesRegionsRepository() {
+        final Map<String, Region> repository = new HashMap();
+        repository.putAll(Text.spritesRegions());
+        repository.putAll(Sprites.spritesRegions());
+        repository.putAll(MainCharacter.spritesRegions());
         return repository;
-    }
-
-    private void setup() {
-        updateHandlers.add(world.pushZone("pallet-town", view));
-        final Sprite mainCharacterSprite = mainCharacterEnvironment(world.currentZone().environment);
-        updateHandlers.add(graphics.pushSpritesLayer(MainCharacter.GROUP_NAME, () -> Stream.of(mainCharacterSprite), view));
     }
 
     private Sprite mainCharacterEnvironment(ZoneEnvironment environment) {

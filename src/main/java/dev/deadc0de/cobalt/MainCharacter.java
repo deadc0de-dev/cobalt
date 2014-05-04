@@ -28,4 +28,10 @@ public class MainCharacter {
         sprites.put("character-right-right", new Region(new Point(32, 32), new Dimension(16, 16)));
         return sprites;
     }
+
+    public static Map<String, Image> spritesImages() {
+        final Map<String, Image> images = new HashMap<>();
+        spritesRegions().keySet().forEach(name -> images.put(name, SPRITES));
+        return images;
+    }
 }

@@ -2,7 +2,7 @@ package dev.deadc0de.cobalt.text;
 
 import java.util.Iterator;
 
-public interface TextFacade extends Runnable {
+public interface TextFacade {
 
     void print(String... messages);
 
