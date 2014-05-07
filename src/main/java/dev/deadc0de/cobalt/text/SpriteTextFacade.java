@@ -21,34 +21,10 @@ public class SpriteTextFacade implements TextFacade, Updatable {
     }
 
     @Override
-    public void print(String... messages) {
-        if (textLayer.dismissed()) {
-            pushTextLayer();
-            textLayer.print(messages);
-        }
-    }
-
-    @Override
     public void print(Iterator<String> messages) {
-        if (textLayer.dismissed()) {
+        if (textLayer.isDismissed()) {
             pushTextLayer();
             textLayer.print(messages);
-        }
-    }
-
-    @Override
-    public void printAndThen(Runnable onEnd, String... messages) {
-        if (textLayer.dismissed()) {
-            pushTextLayer();
-            textLayer.printAndThen(onEnd, messages);
-        }
-    }
-
-    @Override
-    public void printAndThen(Runnable onEnd, Iterator<String> messages) {
-        if (textLayer.dismissed()) {
-            pushTextLayer();
-            textLayer.printAndThen(onEnd, messages);
         }
     }
 
@@ -60,7 +36,7 @@ public class SpriteTextFacade implements TextFacade, Updatable {
     @Override
     public void update() {
         textLayer.update();
-        if (textLayer.dismissed() && pushed) {
+        if (pushed && textLayer.isDismissed()) {
             graphics.popLayer();
             pushed = false;
         }

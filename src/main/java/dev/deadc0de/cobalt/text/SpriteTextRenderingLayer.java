@@ -18,8 +18,6 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     private static final int PRINTING_DELAY = 2;
     private static final String SCROLL_GLYPH = "↓";
     private static final int SCROLL_BLINK_DURATION = 16;
-    private static final Runnable NOOP = () -> {
-    };
 
     private final InputFacade input;
     private final String[][] lines;
@@ -61,33 +59,15 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     }
 
     @Override
-    public void print(String... messages) {
-        print(Arrays.asList(messages).iterator());
-    }
-
-    @Override
     public void print(Iterator<String> messages) {
-        printAndThen(NOOP, messages);
+        chainPrintCalls(messages, this::dismiss);
     }
 
-    @Override
-    public void printAndThen(Runnable onEnd, String... messages) {
-        printAndThen(onEnd, Arrays.asList(messages).iterator());
-    }
-
-    @Override
-    public void printAndThen(Runnable onEnd, Iterator<String> messages) {
-        chainPrintCalls(() -> {
-            onEnd.run();
-            this.dismiss();
-        }, messages);
-    }
-
-    private void chainPrintCalls(Runnable onEnd, Iterator<String> messages) {
+    private void chainPrintCalls(Iterator<String> messages, Runnable onEnd) {
         if (messages.hasNext()) {
             final String message = messages.next();
             if (messages.hasNext()) {
-                print(message, () -> this.chainPrintCalls(onEnd, messages));
+                print(message, () -> this.chainPrintCalls(messages, onEnd));
             } else {
                 print(message, onEnd);
             }
@@ -115,7 +95,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
         state = State.DISMISSED;
     }
 
-    public boolean dismissed() {
+    public boolean isDismissed() {
         return state == State.DISMISSED;
     }
 
