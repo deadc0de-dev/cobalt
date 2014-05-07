@@ -29,6 +29,9 @@ public class PalletTownFactory implements ZoneFactory {
     private static final int TILE_SIZE = 16;
     private static final String NAME = "pallet-town";
     private static final String BACKGROUND_NAME = "pallet-town-background";
+    private static final int OTHER_HOUSE_ROW = 7;
+    private static final int OTHER_HOUSE_COLUMN = 2;
+    private static final Point OTHER_HOUSE_POSITION = new Point(OTHER_HOUSE_COLUMN * TILE_SIZE, OTHER_HOUSE_ROW * TILE_SIZE - 4);
 
     @Override
     public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
@@ -64,7 +67,7 @@ public class PalletTownFactory implements ZoneFactory {
                 rockPositions.stream().map(position -> new StationarySprite(() -> "rock", position))
         ).reduce(Stream.empty(), Stream::concat).collect(Collectors.toList());
         final List<Runnable> updatables = Arrays.asList(() -> flowerAnimation.next().run(), () -> seaAnimation.next().run());
-        final Zone palletTown = new Zone(NAME, BACKGROUND_NAME, sprites::stream, updatables::stream, environment(textFacade));
+        final Zone palletTown = new Zone(NAME, BACKGROUND_NAME, sprites::stream, updatables::stream, environment(textFacade, zoneChanger));
         return palletTown;
     }
 
@@ -72,13 +75,13 @@ public class PalletTownFactory implements ZoneFactory {
         imagesRepository.accept(BACKGROUND_NAME, new Image(PalletTownFactory.class.getResourceAsStream("/dev/deadc0de/cobalt/world/zone/pallet/town/pallet_town.png")));
     }
 
-    private ZoneEnvironment environment(TextFacade textFacade) {
+    private ZoneEnvironment environment(TextFacade textFacade, ZoneChanger zoneChanger) {
         final Grid<Cell> enviroment = new ArrayGrid<>(24, 27);
         final Cell ground = new Cell("ground");
         final Cell obstacle = new Cell("solid");
         final Cell water = new Cell("water");
         final Cell signboard = new Cell("signboard", () -> textFacade.print("Under\ndevelopment:\nplease retry\nlater."));
-        final Cell lockedDoor = new Cell("locked-door", () -> textFacade.print("It's locked."));
+        final Cell otherHouseDoor = new Cell("other-house-door", () -> zoneChanger.changeZone("pallet-town-other-house", OTHER_HOUSE_ROW, OTHER_HOUSE_COLUMN, OTHER_HOUSE_POSITION));
         final Cell labDoor = new Cell("lab-door", () -> textFacade.print("It's locked.", "There's a note on\nthe door:\n32.5°N...", "The rest is torn\naway."));
         final Cell homeDoor = new Cell("home-door", () -> textFacade.print("It's locked.", "Mom..."));
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
@@ -104,7 +107,7 @@ public class PalletTownFactory implements ZoneFactory {
         enviroment.setAt(8, 14, signboard);
         enviroment.setAt(12, 10, signboard);
         enviroment.setAt(16, 16, signboard);
-        enviroment.setAt(8, 16, lockedDoor);
+        enviroment.setAt(8, 16, otherHouseDoor);
         enviroment.setAt(14, 15, labDoor);
         enviroment.setAt(8, 8, homeDoor);
         return new ZoneEnvironment(enviroment, obstacle);
