@@ -1,5 +1,6 @@
 package dev.deadc0de.cobalt.input;
 
+import dev.deadc0de.cobalt.Updatable;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Map;
@@ -9,18 +10,18 @@ import java.util.function.Supplier;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-public class KeyboardInputFacade implements InputFacade {
+public class KeyboardInputFocusStack implements InputFocusStack, Updatable {
 
     private final Map<Class<?>, Map<KeyCode, ?>> inputBindings;
     private final Deque<KeyboardInputMapper<?>> inputMappers;
 
-    public KeyboardInputFacade(Map<Class<?>, Map<KeyCode, ?>> inputBindings) {
+    public KeyboardInputFocusStack(Map<Class<?>, Map<KeyCode, ?>> inputBindings) {
         this.inputBindings = inputBindings;
         inputMappers = new ArrayDeque<>();
     }
 
     @Override
-    public <I> Supplier<Set<I>> push(Class<I> inputType, Supplier<Set<I>> inputsSetFactory) {
+    public <I> Supplier<Set<I>> pushFocus(Class<I> inputType, Supplier<Set<I>> inputsSetFactory) {
         final KeyboardInputMapper<I> mapper = new KeyboardInputMapper<>((Map<KeyCode, I>) inputBindings.get(inputType), inputsSetFactory);
         Optional.ofNullable(inputMappers.peek()).ifPresent(KeyboardInputMapper::clear);
         inputMappers.push(mapper);
@@ -28,13 +29,13 @@ public class KeyboardInputFacade implements InputFacade {
     }
 
     @Override
-    public void pop() {
+    public void popFocus() {
         inputMappers.pop();
     }
 
     @Override
-    public void run() {
-        inputMappers.peek().run();
+    public void update() {
+        inputMappers.peek().update();
     }
 
     public void keyUp(KeyEvent keyEvent) {

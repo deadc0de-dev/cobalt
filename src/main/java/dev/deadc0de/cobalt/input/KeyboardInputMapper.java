@@ -1,5 +1,6 @@
 package dev.deadc0de.cobalt.input;
 
+import dev.deadc0de.cobalt.Updatable;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -7,7 +8,7 @@ import java.util.function.Supplier;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-public class KeyboardInputMapper<I> implements Supplier<Set<I>>, Runnable {
+public class KeyboardInputMapper<I> implements Supplier<Set<I>>, Updatable {
 
     private final Map<KeyCode, I> keyBindings;
     private final Set<KeyCode> pressedKeys;
@@ -27,7 +28,7 @@ public class KeyboardInputMapper<I> implements Supplier<Set<I>>, Runnable {
     }
 
     @Override
-    public void run() {
+    public void update() {
         activeInputs.clear();
         activatedKeys.stream().map(keyBindings::get).forEach(activeInputs::add);
         activatedKeys.clear();

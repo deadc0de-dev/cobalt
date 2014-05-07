@@ -8,7 +8,7 @@ import dev.deadc0de.cobalt.graphics.MovableView;
 import dev.deadc0de.cobalt.graphics.MutableSprite;
 import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.javafx.JavaFXRenderingStack;
-import dev.deadc0de.cobalt.input.KeyboardInputFacade;
+import dev.deadc0de.cobalt.input.KeyboardInputFocusStack;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
 import dev.deadc0de.cobalt.text.TextInput;
 import dev.deadc0de.cobalt.world.MainCharacterController;
@@ -43,11 +43,11 @@ public class Main extends Application {
     private static final int TILE_SIZE = 16;
     private static final Dimension RENDERING_AREA = new Dimension(WIDTH * TILE_SIZE, HEIGHT * TILE_SIZE);
 
-    private final List<Runnable> updateHandlers = new ArrayList<>();
+    private final List<Updatable> updateHandlers = new ArrayList<>();
     private final MovableView view = new MovableView(0, 0, RENDERING_AREA);
     private final Map<String, Image> imagesRepository = imagesRepository();
     private final Map<String, Region> spritesRegionsRepository = spritesRegionsRepository();
-    private final KeyboardInputFacade input;
+    private final KeyboardInputFocusStack input;
     private final StackPane root = new StackPane();
     private final JavaFXRenderingStack graphics;
     private final SpriteTextFacade textFacade;
@@ -58,10 +58,10 @@ public class Main extends Application {
         updateHandlers.add(input);
         graphics = new JavaFXRenderingStack(root.getChildren(), imagesRepository::get, spritesRegionsRepository::get);
         textFacade = new SpriteTextFacade(graphics, new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)), input);
-        updateHandlers.add(textFacade::update);
+        updateHandlers.add(textFacade);
         world = new World(textFacade, imagesRepository::put, spritesRegionsRepository::put, graphics, this::mainCharacterEnvironment);
         updateHandlers.add(world.pushZone("pallet-town", view));
-        updateHandlers.add(graphics::update);
+        updateHandlers.add(graphics);
     }
 
     public static void main(String... args) {
@@ -79,11 +79,11 @@ public class Main extends Application {
         stage.show();
     }
 
-    private KeyboardInputFacade inputFacade() {
+    private KeyboardInputFocusStack inputFacade() {
         final Map<Class<?>, Map<KeyCode, ?>> inputBindings = new HashMap<>();
         inputBindings.put(ZoneInput.class, zoneInput());
         inputBindings.put(TextInput.class, textInput());
-        return new KeyboardInputFacade(inputBindings);
+        return new KeyboardInputFocusStack(inputBindings);
     }
 
     private Map<KeyCode, ZoneInput> zoneInput() {
@@ -137,14 +137,14 @@ public class Main extends Application {
             view.y += y;
         };
         final MainCharacterElement mainCharacterElement = new MainCharacterElement(mainCharacterSprite::setState, onCharacterMoved);
-        final Supplier<Set<ZoneInput>> activeInputProvider = input.push(ZoneInput.class, () -> EnumSet.noneOf(ZoneInput.class));
+        final Supplier<Set<ZoneInput>> activeInputProvider = input.pushFocus(ZoneInput.class, () -> EnumSet.noneOf(ZoneInput.class));
         final MainCharacterController manager = new MainCharacterController(mainCharacterElement, activeInputProvider, environment, 9, 8);
-        updateHandlers.add(manager::update);
+        updateHandlers.add(manager);
         return mainCharacterSprite;
     }
 
     private void startRendering() {
-        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(40), event -> updateHandlers.forEach(Runnable::run)));
+        final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(40), event -> updateHandlers.forEach(Updatable::update)));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }

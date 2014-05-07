@@ -1,9 +1,10 @@
 package dev.deadc0de.cobalt.world;
 
+import dev.deadc0de.cobalt.Updatable;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class MainCharacterController {
+public class MainCharacterController implements Updatable {
 
     private final MainCharacterElement mainCharacter;
     private final Supplier<Set<ZoneInput>> input;
@@ -20,6 +21,7 @@ public class MainCharacterController {
         this.column = initialColumn;
     }
 
+    @Override
     public void update() {
         if (mainCharacter.isIdle()) {
             final Set<ZoneInput> activeInput = input.get();

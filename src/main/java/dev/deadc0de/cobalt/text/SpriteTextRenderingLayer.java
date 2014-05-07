@@ -5,7 +5,7 @@ import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.graphics.RenderingLayer;
 import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.StationarySprite;
-import dev.deadc0de.cobalt.input.InputFacade;
+import dev.deadc0de.cobalt.input.InputFocusStack;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -19,7 +19,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     private static final String SCROLL_GLYPH = "↓";
     private static final int SCROLL_BLINK_DURATION = 16;
 
-    private final InputFacade input;
+    private final InputFocusStack input;
     private final String[][] lines;
     private final Sprite[][] sprites;
     private final StringBuilder buffer;
@@ -31,7 +31,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     private State state;
     private Runnable onEnd;
 
-    public SpriteTextRenderingLayer(InputFacade input) {
+    public SpriteTextRenderingLayer(InputFocusStack input) {
         this.input = input;
         this.lines = new String[2][18];
         this.sprites = new Sprite[lines.length][];
@@ -76,7 +76,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
 
     private void print(String message, Runnable onEnd) {
         if (state == State.DISMISSED) {
-            activeInput = input.push(TextInput.class, () -> EnumSet.noneOf(TextInput.class));
+            activeInput = input.pushFocus(TextInput.class, () -> EnumSet.noneOf(TextInput.class));
         }
         if (state == State.DISMISSED || state == State.ENDED) {
             state = State.PRINTING;
@@ -91,7 +91,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     }
 
     private void dismiss() {
-        input.pop();
+        input.popFocus();
         state = State.DISMISSED;
     }
 

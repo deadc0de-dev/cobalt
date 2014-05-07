@@ -1,5 +1,6 @@
 package dev.deadc0de.cobalt.world;
 
+import dev.deadc0de.cobalt.Updatable;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.graphics.OverlayingSpritesLayer;
 import dev.deadc0de.cobalt.graphics.RenderingLayer;
@@ -37,7 +38,7 @@ public class World {
         }
     }
 
-    public Runnable pushZone(String name, View view) {
+    public Updatable pushZone(String name, View view) {
         if (currentZone != null) {
             popZone();
         }

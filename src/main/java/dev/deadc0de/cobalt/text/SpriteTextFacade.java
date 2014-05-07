@@ -3,7 +3,7 @@ package dev.deadc0de.cobalt.text;
 import dev.deadc0de.cobalt.Updatable;
 import dev.deadc0de.cobalt.graphics.RenderingStack;
 import dev.deadc0de.cobalt.graphics.View;
-import dev.deadc0de.cobalt.input.InputFacade;
+import dev.deadc0de.cobalt.input.InputFocusStack;
 import java.util.Iterator;
 
 public class SpriteTextFacade implements TextFacade, Updatable {
@@ -13,7 +13,7 @@ public class SpriteTextFacade implements TextFacade, Updatable {
     private final SpriteTextRenderingLayer textLayer;
     private boolean pushed;
 
-    public SpriteTextFacade(RenderingStack graphics, View view, InputFacade input) {
+    public SpriteTextFacade(RenderingStack graphics, View view, InputFocusStack input) {
         this.graphics = graphics;
         this.view = view;
         textLayer = new SpriteTextRenderingLayer(input);
