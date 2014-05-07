@@ -20,54 +20,58 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javafx.scene.image.Image;
 
-public class World {
+public class World implements ZoneChanger, Updatable {
 
     private final Map<String, Zone> zones;
     private final RenderingStack graphics;
     private final InputFocusStack input;
     private final Point viewRelativePosition;
+    private final MovableView view;
     private Zone currentZone;
+    private Updatable currentUpdatable;
 
-    public World(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository, RenderingStack graphics, InputFocusStack input, Point viewRelativePosition) {
+    public World(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository, RenderingStack graphics, InputFocusStack input, Point viewRelativePosition, MovableView view) {
         zones = new HashMap<>();
         this.graphics = graphics;
         this.input = input;
         this.viewRelativePosition = viewRelativePosition;
+        this.view = view;
         loadZones(textFacade, imagesRepository, spritesRegionsRepository);
     }
 
     private void loadZones(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
         final Iterable<ZoneFactory> zoneFactories = ServiceLoader.load(ZoneFactory.class);
         for (ZoneFactory zoneFactory : zoneFactories) {
-            final Zone zone = zoneFactory.createZone(textFacade, imagesRepository, spritesRegionsRepository);
+            final Zone zone = zoneFactory.createZone(textFacade, this, imagesRepository, spritesRegionsRepository);
             zones.put(zone.name, zone);
         }
     }
 
-    public Updatable pushZone(String name, int row, int column, Point mainCharacterPosition, MovableView view) {
+    @Override
+    public void changeZone(String name, int row, int column, Point mainCharacterPosition) {
         if (currentZone != null) {
             popZone();
         }
         currentZone = zones.get(name);
-        final MutableSprite mainCharacterSprite = createMainCharacterSprite(mainCharacterPosition, view);
-        final MainCharacterController mainCharacterController = createMainCharacterController(mainCharacterSprite, currentZone.environment, row, column, view);
+        final MutableSprite mainCharacterSprite = createMainCharacterSprite(mainCharacterPosition);
+        final MainCharacterController mainCharacterController = createMainCharacterController(mainCharacterSprite, currentZone.environment, row, column);
         final RenderingLayer layer = new OverlayingSpritesLayer(new ZoneRenderingLayer(currentZone), () -> Stream.of(mainCharacterSprite));
         graphics.pushLayer(layer, view);
         final Zone zoneReference = currentZone;
-        return () -> {
+        currentUpdatable = () -> {
             zoneReference.updatables.get().forEach(Runnable::run);
             mainCharacterController.update();
         };
     }
 
-    private MutableSprite createMainCharacterSprite(Point mainCharacterPosition, MovableView view) {
+    private MutableSprite createMainCharacterSprite(Point mainCharacterPosition) {
         final MutableSprite mainCharacterSprite = new MutableSprite(null, mainCharacterPosition);
         view.x = mainCharacterPosition.x + viewRelativePosition.x;
         view.y = mainCharacterPosition.y + viewRelativePosition.y;
         return mainCharacterSprite;
     }
 
-    private MainCharacterController createMainCharacterController(MutableSprite mainCharacterSprite, ZoneEnvironment environment, int row, int column, MovableView view) {
+    private MainCharacterController createMainCharacterController(MutableSprite mainCharacterSprite, ZoneEnvironment environment, int row, int column) {
         final PositionTracker onCharacterMoved = (x, y) -> {
             mainCharacterSprite.setPosition(mainCharacterSprite.position().add(new Point(x, y)));
             view.x += x;
@@ -90,5 +94,10 @@ public class World {
             throw new IllegalStateException("no zone is currently loaded");
         }
         return currentZone;
+    }
+
+    @Override
+    public void update() {
+        currentUpdatable.update();
     }
 }

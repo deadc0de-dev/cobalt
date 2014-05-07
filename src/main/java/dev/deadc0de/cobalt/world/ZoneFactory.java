@@ -7,5 +7,5 @@ import javafx.scene.image.Image;
 
 public interface ZoneFactory {
 
-    Zone createZone(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository);
+    Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository);
 }

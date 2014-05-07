@@ -12,6 +12,7 @@ import dev.deadc0de.cobalt.text.TextFacade;
 import dev.deadc0de.cobalt.world.Cell;
 import dev.deadc0de.cobalt.world.MutableElement;
 import dev.deadc0de.cobalt.world.Zone;
+import dev.deadc0de.cobalt.world.ZoneChanger;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
 import dev.deadc0de.cobalt.world.ZoneFactory;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class PalletTownFactory implements ZoneFactory {
     private static final String BACKGROUND_NAME = "pallet-town-background";
 
     @Override
-    public Zone createZone(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
+    public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
         addResources(imagesRepository, spritesRegionsRepository);
         final MutableElement flower = new MutableElement();
         final Iterator<Runnable> flowerAnimation = Sprites.flower(flower::setState).iterator();

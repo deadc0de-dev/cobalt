@@ -51,11 +51,12 @@ public class Main extends Application {
         graphics = new JavaFXRenderingStack(root.getChildren(), imagesRepository::get, spritesRegionsRepository::get);
         textFacade = new SpriteTextFacade(graphics, new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)), input);
         updateHandlers.add(textFacade);
-        world = new World(textFacade, imagesRepository::put, spritesRegionsRepository::put, graphics, input, VIEW_RELATIVE_POSITION);
+        world = new World(textFacade, imagesRepository::put, spritesRegionsRepository::put, graphics, input, VIEW_RELATIVE_POSITION, view);
         final int initialRow = 9;
         final int initialColumn = 8;
         final Point initialPosition = new Point(initialColumn * TILE_SIZE, initialRow * TILE_SIZE - 4);
-        updateHandlers.add(world.pushZone("pallet-town", 9, 8, initialPosition, view));
+        world.changeZone("pallet-town", 9, 8, initialPosition);
+        updateHandlers.add(world);
         updateHandlers.add(graphics);
     }
 
