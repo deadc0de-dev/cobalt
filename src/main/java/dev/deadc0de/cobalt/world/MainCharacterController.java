@@ -26,7 +26,7 @@ public class MainCharacterController implements Updatable {
         if (mainCharacter.isIdle()) {
             final Set<ZoneInput> activeInput = input.get();
             if (activeInput.contains(ZoneInput.ACTION)) {
-                getNearCell(mainCharacter.currentDirection()).action.run();
+                getNearCell(mainCharacter.currentDirection()).onSelected(mainCharacter.currentDirection());
                 lastDirection = null;
             } else if (activeInput.contains(ZoneInput.UP)) {
                 tryMove(Direction.UP, row - 1, column);
@@ -67,7 +67,7 @@ public class MainCharacterController implements Updatable {
             mainCharacter.turn(direction);
             return;
         }
-        if (environment.getCellAt(targetRow, targetColumn).type.equals("ground")) {
+        if (environment.getCellAt(targetRow, targetColumn).isTraversable()) {
             mainCharacter.move(direction);
             row = targetRow;
             column = targetColumn;

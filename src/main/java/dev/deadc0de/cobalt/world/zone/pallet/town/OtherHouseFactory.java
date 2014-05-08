@@ -7,6 +7,7 @@ import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.text.TextFacade;
 import dev.deadc0de.cobalt.world.Cell;
+import dev.deadc0de.cobalt.world.Direction;
 import dev.deadc0de.cobalt.world.Zone;
 import dev.deadc0de.cobalt.world.ZoneChanger;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
@@ -36,9 +37,9 @@ public class OtherHouseFactory implements ZoneFactory {
 
     private ZoneEnvironment environment(TextFacade textFacade, ZoneChanger zoneChanger) {
         final Grid<Cell> enviroment = new ArrayGrid<>(9, 8);
-        final Cell ground = new Cell("ground");
-        final Cell obstacle = new Cell("solid");
-        final Cell exit = new Cell("exit", () -> zoneChanger.changeZone("pallet-town", PALLET_TOWN_ROW, PALLET_TOWN_COLUMN, PALLET_TOWN_POSITION));
+        final Cell ground = Cell.traversable(true);
+        final Cell obstacle = Cell.traversable(false);
+        final Cell exit = new Exit(zoneChanger);
         fillRegion(enviroment, obstacle, new Region(new Point(0, 0), new Dimension(8, 1)));
         fillRegion(enviroment, ground, new Region(new Point(0, 1), new Dimension(8, 7)));
         fillRegion(enviroment, obstacle, new Region(new Point(0, 8), new Dimension(8, 1)));
@@ -56,6 +57,25 @@ public class OtherHouseFactory implements ZoneFactory {
             for (int c = region.position.x; c < region.endPosition.x; c++) {
                 grid.setAt(r, c, cell);
             }
+        }
+    }
+
+    private static class Exit implements Cell {
+
+        private final ZoneChanger zoneChanger;
+
+        public Exit(ZoneChanger zoneChanger) {
+            this.zoneChanger = zoneChanger;
+        }
+
+        @Override
+        public boolean isTraversable() {
+            return false;
+        }
+
+        @Override
+        public void onSelected(Direction toward) {
+            zoneChanger.changeZone("pallet-town", PALLET_TOWN_ROW, PALLET_TOWN_COLUMN, PALLET_TOWN_POSITION);
         }
     }
 }

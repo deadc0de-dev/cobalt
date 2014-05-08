@@ -10,6 +10,7 @@ import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.text.TextFacade;
 import dev.deadc0de.cobalt.world.Cell;
+import dev.deadc0de.cobalt.world.Direction;
 import dev.deadc0de.cobalt.world.MutableElement;
 import dev.deadc0de.cobalt.world.Zone;
 import dev.deadc0de.cobalt.world.ZoneChanger;
@@ -77,13 +78,13 @@ public class PalletTownFactory implements ZoneFactory {
 
     private ZoneEnvironment environment(TextFacade textFacade, ZoneChanger zoneChanger) {
         final Grid<Cell> enviroment = new ArrayGrid<>(24, 27);
-        final Cell ground = new Cell("ground");
-        final Cell obstacle = new Cell("solid");
-        final Cell water = new Cell("water");
-        final Cell signboard = new Cell("signboard", () -> textFacade.print("Under\ndevelopment:\nplease retry\nlater."));
-        final Cell otherHouseDoor = new Cell("other-house-door", () -> zoneChanger.changeZone("pallet-town-other-house", OTHER_HOUSE_ROW, OTHER_HOUSE_COLUMN, OTHER_HOUSE_POSITION));
-        final Cell labDoor = new Cell("lab-door", () -> textFacade.print("It's locked.", "There's a note on\nthe door:\n32.5°N...", "The rest is torn\naway."));
-        final Cell homeDoor = new Cell("home-door", () -> textFacade.print("It's locked.", "Mom..."));
+        final Cell ground = Cell.traversable(true);
+        final Cell obstacle = Cell.traversable(false);
+        final Cell water = Cell.traversable(false);
+        final Cell signboard = new MessageCell(textFacade, "Under\ndevelopment:\nplease retry\nlater.");
+        final Cell otherHouseDoor = new ActionCell(() -> zoneChanger.changeZone("pallet-town-other-house", OTHER_HOUSE_ROW, OTHER_HOUSE_COLUMN, OTHER_HOUSE_POSITION));
+        final Cell labDoor = new MessageCell(textFacade, "It's locked.", "There's a note on\nthe door:\n32.5°N...", "The rest is torn\naway.");
+        final Cell homeDoor = new MessageCell(textFacade, "It's locked.", "Mom...");
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
         fillRegion(enviroment, obstacle, new Region(new Point(6, 0), new Dimension(1, 4)));
         fillRegion(enviroment, obstacle, new Region(new Point(12, 0), new Dimension(1, 4)));
@@ -118,6 +119,46 @@ public class PalletTownFactory implements ZoneFactory {
             for (int c = region.position.x; c < region.endPosition.x; c++) {
                 grid.setAt(r, c, cell);
             }
+        }
+    }
+
+    private static class MessageCell implements Cell {
+
+        private final TextFacade textFacade;
+        private final String[] messages;
+
+        public MessageCell(TextFacade textFacade, String... messages) {
+            this.textFacade = textFacade;
+            this.messages = messages;
+        }
+
+        @Override
+        public boolean isTraversable() {
+            return false;
+        }
+
+        @Override
+        public void onSelected(Direction toward) {
+            textFacade.print(messages);
+        }
+    }
+
+    private static class ActionCell implements Cell {
+
+        private final Runnable action;
+
+        public ActionCell(Runnable action) {
+            this.action = action;
+        }
+
+        @Override
+        public boolean isTraversable() {
+            return false;
+        }
+
+        @Override
+        public void onSelected(Direction toward) {
+            action.run();
         }
     }
 }

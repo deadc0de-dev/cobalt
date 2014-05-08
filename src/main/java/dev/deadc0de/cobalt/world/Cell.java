@@ -1,20 +1,25 @@
 package dev.deadc0de.cobalt.world;
 
-public class Cell {
+public interface Cell {
 
-    private static final Runnable NOOP = () -> {
-    };
+    boolean isTraversable();
 
-    public final String type;
-    public final Runnable action;
-
-    public Cell(String type) {
-        this.type = type;
-        this.action = NOOP;
+    default void onSelected(Direction toward) {
     }
 
-    public Cell(String type, Runnable action) {
-        this.type = type;
-        this.action = action;
+    default void beforeEnter(Direction toward) {
+    }
+
+    default void onEnter(Direction toward) {
+    }
+
+    default void beforeLeave(Direction toward) {
+    }
+
+    default void onLeave(Direction toward) {
+    }
+
+    static Cell traversable(boolean traversable) {
+        return () -> traversable;
     }
 }
