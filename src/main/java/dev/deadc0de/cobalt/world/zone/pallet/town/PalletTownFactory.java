@@ -32,7 +32,7 @@ public class PalletTownFactory implements ZoneFactory {
     private static final String BACKGROUND_NAME = "pallet-town-background";
     private static final int OTHER_HOUSE_ROW = 7;
     private static final int OTHER_HOUSE_COLUMN = 2;
-    private static final Point OTHER_HOUSE_POSITION = new Point(OTHER_HOUSE_COLUMN * TILE_SIZE, OTHER_HOUSE_ROW * TILE_SIZE - 4);
+    private static final Point OTHER_HOUSE_POSITION = new Point((OTHER_HOUSE_COLUMN + 4) * TILE_SIZE, (OTHER_HOUSE_ROW + 4) * TILE_SIZE - 4);
 
     @Override
     public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {

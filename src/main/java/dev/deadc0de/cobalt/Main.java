@@ -3,10 +3,8 @@ package dev.deadc0de.cobalt;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.graphics.ImmutableRenderingLayer;
 import dev.deadc0de.cobalt.graphics.ImmutableView;
 import dev.deadc0de.cobalt.graphics.MovableView;
-import dev.deadc0de.cobalt.graphics.RenderingLayer;
 import dev.deadc0de.cobalt.graphics.javafx.JavaFXRenderingStack;
 import dev.deadc0de.cobalt.input.KeyboardInputFocusStack;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
@@ -18,18 +16,15 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
-import javafx.scene.image.PixelWriter;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
@@ -55,7 +50,6 @@ public class Main extends Application {
         input = inputFacade();
         updateHandlers.add(input);
         graphics = new JavaFXRenderingStack(root.getChildren(), imagesRepository::get, spritesRegionsRepository::get);
-        addBlackBackground();
         textFacade = new SpriteTextFacade(graphics, new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)), input);
         updateHandlers.add(textFacade);
         world = new World(textFacade, imagesRepository::put, spritesRegionsRepository::put, graphics, input, VIEW_RELATIVE_POSITION, view);
@@ -74,6 +68,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         final Scene scene = new Scene(root);
+        scene.setFill(Color.LIGHTGREY);
         scene.setOnKeyPressed(input::keyDown);
         scene.setOnKeyReleased(input::keyUp);
         stage.setScene(scene);
@@ -107,17 +102,6 @@ public class Main extends Application {
         bindings.put(KeyCode.K, TextInput.FORWARD);
         bindings.put(KeyCode.M, TextInput.FORWARD);
         return bindings;
-    }
-
-    private void addBlackBackground() {
-        final WritableImage background = new WritableImage(RENDERING_AREA.width, RENDERING_AREA.height);
-        final PixelWriter pixelWriter = background.getPixelWriter();
-        IntStream.range(0, RENDERING_AREA.width)
-                .forEach(x -> IntStream.range(0, RENDERING_AREA.height)
-                        .forEach(y -> pixelWriter.setArgb(x, y, 0XFF000000)));
-        imagesRepository.put("black", background);
-        final RenderingLayer renderingLayer = new ImmutableRenderingLayer("black", Stream::empty);
-        graphics.pushLayer(renderingLayer, new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)));
     }
 
     private Map<String, Image> imagesRepository() {
