@@ -6,6 +6,7 @@ import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.StationarySprite;
+import dev.deadc0de.cobalt.graphics.javafx.SpritesRepository;
 import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.text.TextFacade;
@@ -20,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.scene.image.Image;
@@ -35,8 +35,8 @@ public class PalletTownFactory implements ZoneFactory {
     private static final Point OTHER_HOUSE_POSITION = new Point((OTHER_HOUSE_COLUMN + 4) * TILE_SIZE, (OTHER_HOUSE_ROW + 4) * TILE_SIZE - 4);
 
     @Override
-    public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
-        addResources(imagesRepository, spritesRegionsRepository);
+    public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, SpritesRepository spritesRepository) {
+        addResources(spritesRepository);
         final MutableElement flower = new MutableElement();
         final Iterator<Runnable> flowerAnimation = Sprites.flower(flower::setState).iterator();
         final List<Point> flowersPositions = new ArrayList<>();
@@ -72,8 +72,8 @@ public class PalletTownFactory implements ZoneFactory {
         return palletTown;
     }
 
-    private void addResources(BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
-        imagesRepository.accept(BACKGROUND_NAME, new Image(PalletTownFactory.class.getResourceAsStream("/dev/deadc0de/cobalt/world/zone/pallet/town/pallet_town.png")));
+    private void addResources(SpritesRepository spritesRepository) {
+        spritesRepository.addImage(BACKGROUND_NAME, new Image(PalletTownFactory.class.getResourceAsStream("/dev/deadc0de/cobalt/world/zone/pallet/town/pallet_town.png")));
     }
 
     private ZoneEnvironment environment(TextFacade textFacade, ZoneChanger zoneChanger) {

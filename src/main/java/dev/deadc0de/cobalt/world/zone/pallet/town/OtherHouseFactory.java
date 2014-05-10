@@ -3,6 +3,7 @@ package dev.deadc0de.cobalt.world.zone.pallet.town;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
+import dev.deadc0de.cobalt.graphics.javafx.SpritesRepository;
 import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.text.TextFacade;
@@ -12,7 +13,6 @@ import dev.deadc0de.cobalt.world.Zone;
 import dev.deadc0de.cobalt.world.ZoneChanger;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
 import dev.deadc0de.cobalt.world.ZoneFactory;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import javafx.scene.image.Image;
 
@@ -26,13 +26,13 @@ public class OtherHouseFactory implements ZoneFactory {
     private static final Point PALLET_TOWN_POSITION = new Point(PALLET_TOWN_COLUMN * TILE_SIZE, PALLET_TOWN_ROW * TILE_SIZE - 4);
 
     @Override
-    public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
-        addResources(imagesRepository, spritesRegionsRepository);
+    public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, SpritesRepository spritesRepository) {
+        addResources(spritesRepository);
         return new Zone(NAME, BACKGROUND_NAME, Stream::empty, Stream::empty, environment(textFacade, zoneChanger));
     }
 
-    private void addResources(BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
-        imagesRepository.accept(BACKGROUND_NAME, new Image(OtherHouseFactory.class.getResourceAsStream("/dev/deadc0de/cobalt/world/zone/pallet/town/other_house.png")));
+    private void addResources(SpritesRepository spritesRepository) {
+        spritesRepository.addImage(BACKGROUND_NAME, new Image(OtherHouseFactory.class.getResourceAsStream("/dev/deadc0de/cobalt/world/zone/pallet/town/other_house.png")));
     }
 
     private ZoneEnvironment environment(TextFacade textFacade, ZoneChanger zoneChanger) {

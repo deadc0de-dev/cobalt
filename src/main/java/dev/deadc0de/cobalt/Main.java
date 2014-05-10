@@ -7,6 +7,7 @@ import dev.deadc0de.cobalt.graphics.FixedSizeView;
 import dev.deadc0de.cobalt.graphics.ImmutableView;
 import dev.deadc0de.cobalt.graphics.MovableView;
 import dev.deadc0de.cobalt.graphics.javafx.JavaFXRenderingStack;
+import dev.deadc0de.cobalt.graphics.javafx.SpritesRepository;
 import dev.deadc0de.cobalt.input.KeyboardInputFocusStack;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
 import dev.deadc0de.cobalt.text.TextInput;
@@ -22,7 +23,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -39,8 +39,7 @@ public class Main extends Application {
 
     private final List<Updatable> updateHandlers = new ArrayList<>();
     private final MovableView view = new FixedSizeView(RENDERING_AREA);
-    private final Map<String, Image> imagesRepository = imagesRepository();
-    private final Map<String, Region> spritesRegionsRepository = spritesRegionsRepository();
+    private final SpritesRepository spritesRepository = new SpritesRepository();
     private final KeyboardInputFocusStack input;
     private final StackPane root = new StackPane();
     private final JavaFXRenderingStack graphics;
@@ -50,10 +49,10 @@ public class Main extends Application {
     public Main() {
         input = inputFacade();
         updateHandlers.add(input);
-        graphics = new JavaFXRenderingStack(root.getChildren(), imagesRepository::get, spritesRegionsRepository::get);
+        graphics = new JavaFXRenderingStack(root.getChildren(), spritesRepository);
         textFacade = new SpriteTextFacade(graphics, new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)), input);
         updateHandlers.add(textFacade);
-        world = new World(textFacade, imagesRepository::put, spritesRegionsRepository::put, graphics, input, VIEW_RELATIVE_POSITION, view);
+        world = new World(textFacade, spritesRepository, graphics, input, VIEW_RELATIVE_POSITION, view);
         final int initialRow = 9;
         final int initialColumn = 8;
         final Point initialPosition = new Point(initialColumn * TILE_SIZE, initialRow * TILE_SIZE - 4);
@@ -74,7 +73,9 @@ public class Main extends Application {
         scene.setOnKeyReleased(input::keyUp);
         stage.setScene(scene);
         stage.setTitle("Cobalt");
-        startRendering();
+        addBaseImages();
+        addBaseSpritesRegions();
+        startTicks();
         stage.show();
     }
 
@@ -105,27 +106,23 @@ public class Main extends Application {
         return bindings;
     }
 
-    private Map<String, Image> imagesRepository() {
-        final Map<String, Image> repository = new HashMap();
-        repository.put(Text.BACKGROUND_NAME, Text.BACKGROUND);
-        repository.put(Text.GROUP_NAME, Text.SPRITES);
-        repository.putAll(Text.spritesImages());
-        repository.put(Sprites.GROUP_NAME, Sprites.SPRITES);
-        repository.putAll(Sprites.spritesImages());
-        repository.put(MainCharacter.GROUP_NAME, MainCharacter.SPRITES);
-        repository.putAll(MainCharacter.spritesImages());
-        return repository;
+    private void addBaseImages() {
+        spritesRepository.addImage(Text.BACKGROUND_NAME, Text.BACKGROUND);
+        spritesRepository.addImage(Text.GROUP_NAME, Text.SPRITES);
+        Text.spritesImages().forEach(spritesRepository::addImage);
+        spritesRepository.addImage(Sprites.GROUP_NAME, Sprites.SPRITES);
+        Sprites.spritesImages().forEach(spritesRepository::addImage);
+        spritesRepository.addImage(MainCharacter.GROUP_NAME, MainCharacter.SPRITES);
+        MainCharacter.spritesImages().forEach(spritesRepository::addImage);
     }
 
-    private Map<String, Region> spritesRegionsRepository() {
-        final Map<String, Region> repository = new HashMap();
-        repository.putAll(Text.spritesRegions());
-        repository.putAll(Sprites.spritesRegions());
-        repository.putAll(MainCharacter.spritesRegions());
-        return repository;
+    private void addBaseSpritesRegions() {
+        Text.spritesRegions().forEach((name, region) -> spritesRepository.addSprite(name, name, region));
+        Sprites.spritesRegions().forEach((name, region) -> spritesRepository.addSprite(name, name, region));
+        MainCharacter.spritesRegions().forEach((name, region) -> spritesRepository.addSprite(name, name, region));
     }
 
-    private void startRendering() {
+    private void startTicks() {
         final Timeline timeline = new Timeline(new KeyFrame(Duration.millis(40), event -> updateHandlers.forEach(Updatable::update)));
         timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();

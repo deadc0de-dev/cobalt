@@ -5,23 +5,21 @@ import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.View;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.util.Pair;
 
 public class SpritesRenderer implements Updatable {
 
-    private final Function<String, Image> spritesImages;
-    private final Function<String, Region> spritesRegions;
+    private final SpritesRepository spritesRepository;
     private final Supplier<Stream<Sprite>> spritesPositions;
     private final View view;
     private final GraphicsContext graphics;
 
-    public SpritesRenderer(Function<String, Image> spritesImages, Function<String, Region> spritesRegions, Supplier<Stream<Sprite>> spritesPositions, View view, GraphicsContext graphics) {
-        this.spritesImages = spritesImages;
-        this.spritesRegions = spritesRegions;
+    public SpritesRenderer(SpritesRepository spritesRepository, Supplier<Stream<Sprite>> spritesPositions, View view, GraphicsContext graphics) {
+        this.spritesRepository = spritesRepository;
         this.spritesPositions = spritesPositions;
         this.view = view;
         this.graphics = graphics;
@@ -31,8 +29,9 @@ public class SpritesRenderer implements Updatable {
     public void update() {
         graphics.clearRect(0, 0, view.width(), view.height());
         spritesPositions.get().forEach(sprite -> {
-            final Image image = spritesImages.apply(sprite.state());
-            final Region spriteRegion = spritesRegions.apply(sprite.state());
+            final Pair<Image, Region> spriteSource = spritesRepository.getSpriteSource(sprite.state());
+            final Image image = spriteSource.getKey();
+            final Region spriteRegion = spriteSource.getValue();
             final Point position = sprite.position();
             final int x = position.x - view.x();
             final int y = position.y - view.y();
