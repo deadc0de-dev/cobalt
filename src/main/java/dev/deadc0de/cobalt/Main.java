@@ -69,7 +69,7 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
         final Scene scene = new Scene(root);
-        scene.setFill(Color.LIGHTGREY);
+        scene.setFill(Color.rgb(0x00, 0x47, 0xAB, 0.5d));
         scene.setOnKeyPressed(input::keyDown);
         scene.setOnKeyReleased(input::keyUp);
         stage.setScene(scene);
