@@ -1,41 +1,24 @@
 package dev.deadc0de.cobalt.graphics;
 
-import dev.deadc0de.cobalt.geometry.Dimension;
+public interface MovableView extends View {
 
-public class MovableView implements View {
+    void relocate(int x, int y);
 
-    public int x;
-    public int y;
-    private final Dimension size;
-
-    public MovableView(int x, int y, Dimension size) {
-        this.x = x;
-        this.y = y;
-        this.size = size;
+    default void relocateX(int x) {
+        relocate(x, y());
     }
 
-    @Override
-    public int x() {
-        return x;
+    default void relocateY(int y) {
+        relocate(x(), y);
     }
 
-    @Override
-    public int y() {
-        return y;
+    void move(int dx, int dy);
+
+    default void moveX(int dx) {
+        move(dx, 0);
     }
 
-    @Override
-    public int width() {
-        return size.width;
-    }
-
-    @Override
-    public int height() {
-        return size.height;
-    }
-
-    @Override
-    public Dimension size() {
-        return size;
+    default void moveY(int dy) {
+        move(0, dy);
     }
 }

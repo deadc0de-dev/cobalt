@@ -45,8 +45,7 @@ public class World implements ZoneChanger, Updatable {
 
     private void onCharacterMoved(int dx, int dy) {
         mainCharacterSprite.setPosition(mainCharacterSprite.position().add(new Point(dx, dy)));
-        view.x += dx;
-        view.y += dy;
+        view.move(dx, dy);
     }
 
     private void loadZones(TextFacade textFacade, BiConsumer<String, Image> imagesRepository, BiConsumer<String, Region> spritesRegionsRepository) {
@@ -82,8 +81,7 @@ public class World implements ZoneChanger, Updatable {
 
     private void updatePosition(Point mainCharacterPosition) {
         mainCharacterSprite.setPosition(mainCharacterPosition);
-        view.x = mainCharacterPosition.x + viewRelativePosition.x;
-        view.y = mainCharacterPosition.y + viewRelativePosition.y;
+        view.relocate(mainCharacterPosition.x + viewRelativePosition.x, mainCharacterPosition.y + viewRelativePosition.y);
     }
 
     private MainCharacterController createMainCharacterController(ZoneEnvironment environment, int row, int column) {

@@ -3,6 +3,7 @@ package dev.deadc0de.cobalt;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
+import dev.deadc0de.cobalt.graphics.FixedSizeView;
 import dev.deadc0de.cobalt.graphics.ImmutableView;
 import dev.deadc0de.cobalt.graphics.MovableView;
 import dev.deadc0de.cobalt.graphics.javafx.JavaFXRenderingStack;
@@ -37,7 +38,7 @@ public class Main extends Application {
     private static final Point VIEW_RELATIVE_POSITION = new Point(- 4 * TILE_SIZE, - 4 * TILE_SIZE + 4);
 
     private final List<Updatable> updateHandlers = new ArrayList<>();
-    private final MovableView view = new MovableView(0, 0, RENDERING_AREA);
+    private final MovableView view = new FixedSizeView(RENDERING_AREA);
     private final Map<String, Image> imagesRepository = imagesRepository();
     private final Map<String, Region> spritesRegionsRepository = spritesRegionsRepository();
     private final KeyboardInputFocusStack input;
