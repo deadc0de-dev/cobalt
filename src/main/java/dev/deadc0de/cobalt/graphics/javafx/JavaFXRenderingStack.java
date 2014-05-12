@@ -4,6 +4,7 @@ import dev.deadc0de.cobalt.Updatable;
 import dev.deadc0de.cobalt.graphics.RenderingLayer;
 import dev.deadc0de.cobalt.graphics.RenderingStack;
 import dev.deadc0de.cobalt.graphics.Sprite;
+import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import dev.deadc0de.cobalt.graphics.View;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -19,9 +20,9 @@ public class JavaFXRenderingStack implements RenderingStack, Updatable {
 
     private final List<Node> componentsStack;
     private final Deque<Updatable> updateStack;
-    private final SpritesRepository spritesRepository;
+    private final SpritesRepository<Image> spritesRepository;
 
-    public JavaFXRenderingStack(List<Node> componentsStack, SpritesRepository spritesRepository) {
+    public JavaFXRenderingStack(List<Node> componentsStack, SpritesRepository<Image> spritesRepository) {
         this.componentsStack = componentsStack;
         updateStack = new LinkedList<>();
         this.spritesRepository = spritesRepository;
@@ -45,7 +46,7 @@ public class JavaFXRenderingStack implements RenderingStack, Updatable {
     }
 
     private Updatable imageLayer(String name, View view) {
-        final Image image = spritesRepository.getImage(name);
+        final Image image = spritesRepository.getSource(name);
         final ImageView imageView = new ImageView(image);
         imageView.setFitWidth(view.width());
         imageView.setFitHeight(view.height());

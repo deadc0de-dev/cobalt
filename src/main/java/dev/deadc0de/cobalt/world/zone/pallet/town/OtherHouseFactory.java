@@ -3,7 +3,7 @@ package dev.deadc0de.cobalt.world.zone.pallet.town;
 import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
-import dev.deadc0de.cobalt.graphics.javafx.SpritesRepository;
+import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import dev.deadc0de.cobalt.grid.ArrayGrid;
 import dev.deadc0de.cobalt.grid.Grid;
 import dev.deadc0de.cobalt.text.TextFacade;
@@ -14,7 +14,6 @@ import dev.deadc0de.cobalt.world.ZoneChanger;
 import dev.deadc0de.cobalt.world.ZoneEnvironment;
 import dev.deadc0de.cobalt.world.ZoneFactory;
 import java.util.stream.Stream;
-import javafx.scene.image.Image;
 
 public class OtherHouseFactory implements ZoneFactory {
 
@@ -26,13 +25,13 @@ public class OtherHouseFactory implements ZoneFactory {
     private static final Point PALLET_TOWN_POSITION = new Point(PALLET_TOWN_COLUMN * TILE_SIZE, PALLET_TOWN_ROW * TILE_SIZE - 4);
 
     @Override
-    public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, SpritesRepository spritesRepository) {
+    public Zone createZone(TextFacade textFacade, ZoneChanger zoneChanger, SpritesRepository<?> spritesRepository) {
         addResources(spritesRepository);
         return new Zone(NAME, BACKGROUND_NAME, Stream::empty, Stream::empty, environment(textFacade, zoneChanger));
     }
 
-    private void addResources(SpritesRepository spritesRepository) {
-        spritesRepository.addImage(BACKGROUND_NAME, new Image(OtherHouseFactory.class.getResourceAsStream("/dev/deadc0de/cobalt/world/zone/pallet/town/other_house.png")));
+    private void addResources(SpritesRepository<?> spritesRepository) {
+        spritesRepository.addSource(BACKGROUND_NAME, "/dev/deadc0de/cobalt/world/zone/pallet/town/other_house.png");
     }
 
     private ZoneEnvironment environment(TextFacade textFacade, ZoneChanger zoneChanger) {

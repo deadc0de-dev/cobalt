@@ -7,7 +7,7 @@ import dev.deadc0de.cobalt.graphics.MutableSprite;
 import dev.deadc0de.cobalt.graphics.OverlayingSpritesLayer;
 import dev.deadc0de.cobalt.graphics.RenderingLayer;
 import dev.deadc0de.cobalt.graphics.RenderingStack;
-import dev.deadc0de.cobalt.graphics.javafx.SpritesRepository;
+import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import dev.deadc0de.cobalt.input.InputFocusStack;
 import dev.deadc0de.cobalt.text.TextFacade;
 import java.util.EnumSet;
@@ -30,7 +30,7 @@ public class World implements ZoneChanger, Updatable {
     private Zone currentZone;
     private Updatable currentUpdatable;
 
-    public World(TextFacade textFacade, SpritesRepository spritesRepository, RenderingStack graphics, InputFocusStack input, Point viewRelativePosition, MovableView view) {
+    public World(TextFacade textFacade, SpritesRepository<?> spritesRepository, RenderingStack graphics, InputFocusStack input, Point viewRelativePosition, MovableView view) {
         zones = new HashMap<>();
         this.graphics = graphics;
         this.input = input;
@@ -46,7 +46,7 @@ public class World implements ZoneChanger, Updatable {
         view.move(dx, dy);
     }
 
-    private void loadZones(TextFacade textFacade, SpritesRepository spritesRepository) {
+    private void loadZones(TextFacade textFacade, SpritesRepository<?> spritesRepository) {
         final Iterable<ZoneFactory> zoneFactories = ServiceLoader.load(ZoneFactory.class);
         for (ZoneFactory zoneFactory : zoneFactories) {
             final Zone zone = zoneFactory.createZone(textFacade, this, spritesRepository);

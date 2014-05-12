@@ -6,8 +6,9 @@ import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.graphics.FixedSizeView;
 import dev.deadc0de.cobalt.graphics.ImmutableView;
 import dev.deadc0de.cobalt.graphics.MovableView;
+import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import dev.deadc0de.cobalt.graphics.javafx.JavaFXRenderingStack;
-import dev.deadc0de.cobalt.graphics.javafx.SpritesRepository;
+import dev.deadc0de.cobalt.graphics.javafx.ImageSpritesRepository;
 import dev.deadc0de.cobalt.input.KeyboardInputFocusStack;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
 import dev.deadc0de.cobalt.text.TextInput;
@@ -23,6 +24,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -39,7 +41,7 @@ public class Main extends Application {
 
     private final List<Updatable> updateHandlers = new ArrayList<>();
     private final MovableView view = new FixedSizeView(RENDERING_AREA);
-    private final SpritesRepository spritesRepository = new SpritesRepository();
+    private final SpritesRepository<Image> spritesRepository = new ImageSpritesRepository();
     private final KeyboardInputFocusStack input;
     private final StackPane root = new StackPane();
     private final JavaFXRenderingStack graphics;
@@ -73,8 +75,7 @@ public class Main extends Application {
         scene.setOnKeyReleased(input::keyUp);
         stage.setScene(scene);
         stage.setTitle("Cobalt");
-        addBaseImages();
-        addBaseSpritesRegions();
+        addGlobalSprites();
         startTicks();
         stage.show();
     }
@@ -106,20 +107,10 @@ public class Main extends Application {
         return bindings;
     }
 
-    private void addBaseImages() {
-        spritesRepository.addImage(Text.BACKGROUND_NAME, Text.BACKGROUND);
-        spritesRepository.addImage(Text.GROUP_NAME, Text.SPRITES);
-        Text.spritesImages().forEach(spritesRepository::addImage);
-        spritesRepository.addImage(Sprites.GROUP_NAME, Sprites.SPRITES);
-        Sprites.spritesImages().forEach(spritesRepository::addImage);
-        spritesRepository.addImage(MainCharacter.GROUP_NAME, MainCharacter.SPRITES);
-        MainCharacter.spritesImages().forEach(spritesRepository::addImage);
-    }
-
-    private void addBaseSpritesRegions() {
-        Text.spritesRegions().forEach((name, region) -> spritesRepository.addSprite(name, name, region));
-        Sprites.spritesRegions().forEach((name, region) -> spritesRepository.addSprite(name, name, region));
-        MainCharacter.spritesRegions().forEach((name, region) -> spritesRepository.addSprite(name, name, region));
+    private void addGlobalSprites() {
+        Sprites.addSprites(spritesRepository);
+        Text.addSprites(spritesRepository);
+        MainCharacter.addSprites(spritesRepository);
     }
 
     private void startTicks() {
