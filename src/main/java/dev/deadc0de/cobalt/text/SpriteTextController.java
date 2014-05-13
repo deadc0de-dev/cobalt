@@ -2,7 +2,6 @@ package dev.deadc0de.cobalt.text;
 
 import dev.deadc0de.cobalt.Updatable;
 import dev.deadc0de.cobalt.geometry.Point;
-import dev.deadc0de.cobalt.graphics.RenderingLayer;
 import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.StationarySprite;
 import dev.deadc0de.cobalt.input.InputFocusStack;
@@ -13,10 +12,12 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Updatable {
+public class SpriteTextController implements Updatable {
 
     private static final int PRINTING_DELAY = 2;
+    private static final String BLANK_GLYPH = " ";
     private static final String SCROLL_GLYPH = "↓";
+    private static final String NEW_LINE = "\n";
     private static final int SCROLL_BLINK_DURATION = 16;
 
     private final InputFocusStack input;
@@ -31,7 +32,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     private State state;
     private Runnable onEnd;
 
-    public SpriteTextRenderingLayer(InputFocusStack input) {
+    public SpriteTextController(InputFocusStack input) {
         this.input = input;
         this.lines = new String[2][18];
         this.sprites = new Sprite[lines.length][];
@@ -54,11 +55,10 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
 
     private void clear() {
         for (String[] line : lines) {
-            Arrays.fill(line, " ");
+            Arrays.fill(line, BLANK_GLYPH);
         }
     }
 
-    @Override
     public void print(Iterator<String> messages) {
         chainPrintCalls(messages, this::dismiss);
     }
@@ -135,7 +135,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     private void updateBlinkingScroll() {
         blinkDelay--;
         if (blinkDelay <= 0) {
-            lines[1][17] = lines[1][17] == SCROLL_GLYPH ? " " : SCROLL_GLYPH;
+            lines[1][17] = lines[1][17] == SCROLL_GLYPH ? BLANK_GLYPH : SCROLL_GLYPH;
             blinkDelay = SCROLL_BLINK_DURATION;
         }
     }
@@ -146,7 +146,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
             return;
         }
         String letter = buffer.substring(0, 1);
-        if (letter.equals("\n")) {
+        if (letter.equals(NEW_LINE)) {
             buffer.deleteCharAt(0);
             lineFeed();
             printNextGlyph();
@@ -167,7 +167,7 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
     }
 
     private void scroll() {
-        lines[1][17] = " ";
+        lines[1][17] = BLANK_GLYPH;
         final String[] firstLine = lines[0];
         for (int i = 0; i < lines.length - 1; i++) {
             lines[i] = lines[i + 1];
@@ -178,14 +178,8 @@ public class SpriteTextRenderingLayer implements TextFacade, RenderingLayer, Upd
         state = State.PRINTING;
     }
 
-    @Override
     public Stream<Sprite> sprites() {
         return Stream.of(sprites).flatMap(Stream::of);
-    }
-
-    @Override
-    public String background() {
-        return "text-background";
     }
 
     private static enum State {

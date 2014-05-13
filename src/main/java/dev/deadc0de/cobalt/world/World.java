@@ -4,9 +4,8 @@ import dev.deadc0de.cobalt.Updatable;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.graphics.MovableView;
 import dev.deadc0de.cobalt.graphics.MutableSprite;
-import dev.deadc0de.cobalt.graphics.OverlayingSpritesLayer;
-import dev.deadc0de.cobalt.graphics.RenderingLayer;
-import dev.deadc0de.cobalt.graphics.RenderingStack;
+import dev.deadc0de.cobalt.graphics.GraphicsStack;
+import dev.deadc0de.cobalt.graphics.SpritesLayer;
 import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import dev.deadc0de.cobalt.input.InputFocusStack;
 import dev.deadc0de.cobalt.text.TextFacade;
@@ -16,12 +15,11 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public class World implements ZoneChanger, Updatable {
 
     private final Map<String, Zone> zones;
-    private final RenderingStack graphics;
+    private final GraphicsStack.Frame graphics;
     private final InputFocusStack input;
     private final MutableSprite mainCharacterSprite;
     private final MainCharacterElement mainCharacterElement;
@@ -30,7 +28,7 @@ public class World implements ZoneChanger, Updatable {
     private Zone currentZone;
     private Updatable currentUpdatable;
 
-    public World(TextFacade textFacade, SpritesRepository<?> spritesRepository, RenderingStack graphics, InputFocusStack input, Point viewRelativePosition, MovableView view) {
+    public World(TextFacade textFacade, SpritesRepository<?> spritesRepository, GraphicsStack.Frame graphics, InputFocusStack input, Point viewRelativePosition, MovableView view) {
         zones = new HashMap<>();
         this.graphics = graphics;
         this.input = input;
@@ -62,8 +60,11 @@ public class World implements ZoneChanger, Updatable {
         currentZone = zones.get(name);
         updatePosition(mainCharacterPosition);
         final MainCharacterController mainCharacterController = createMainCharacterController(currentZone.environment, row, column);
-        final RenderingLayer layer = new OverlayingSpritesLayer(new ZoneRenderingLayer(currentZone), () -> Stream.of(mainCharacterSprite));
-        graphics.pushLayer(layer, view);
+        graphics.pushSingleSourceLayer(currentZone.backgroundName);
+        final SpritesLayer environmentSpritesLayer = graphics.pushSpritesLayer();
+        environmentSpritesLayer.addSprites(currentZone.spritesSource.get().iterator());
+        final SpritesLayer mainCharacterSpriteLayer = graphics.pushSpritesLayer();
+        mainCharacterSpriteLayer.addSprite(mainCharacterSprite);
         final Zone zoneReference = currentZone;
         currentUpdatable = () -> {
             zoneReference.updatables.get().forEach(Runnable::run);
@@ -74,6 +75,8 @@ public class World implements ZoneChanger, Updatable {
     private void popZone() {
         currentZone = null;
         input.popFocus();
+        graphics.popLayer();
+        graphics.popLayer();
         graphics.popLayer();
     }
 

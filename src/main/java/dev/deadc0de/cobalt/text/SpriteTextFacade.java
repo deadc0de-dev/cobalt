@@ -1,22 +1,20 @@
 package dev.deadc0de.cobalt.text;
 
 import dev.deadc0de.cobalt.Updatable;
-import dev.deadc0de.cobalt.graphics.RenderingStack;
-import dev.deadc0de.cobalt.graphics.View;
+import dev.deadc0de.cobalt.graphics.GraphicsStack;
+import dev.deadc0de.cobalt.graphics.SpritesLayer;
 import dev.deadc0de.cobalt.input.InputFocusStack;
 import java.util.Iterator;
 
 public class SpriteTextFacade implements TextFacade, Updatable {
 
-    private final RenderingStack graphics;
-    private final View view;
-    private final SpriteTextRenderingLayer textLayer;
+    private final GraphicsStack.Frame graphics;
+    private final SpriteTextController textLayer;
     private boolean pushed;
 
-    public SpriteTextFacade(RenderingStack graphics, View view, InputFocusStack input) {
+    public SpriteTextFacade(GraphicsStack.Frame graphics, InputFocusStack input) {
         this.graphics = graphics;
-        this.view = view;
-        textLayer = new SpriteTextRenderingLayer(input);
+        textLayer = new SpriteTextController(input);
         pushed = false;
     }
 
@@ -29,7 +27,9 @@ public class SpriteTextFacade implements TextFacade, Updatable {
     }
 
     private void pushTextLayer() {
-        graphics.pushLayer(textLayer, view);
+        graphics.pushSingleSourceLayer("text-background");
+        final SpritesLayer spritesLayer = graphics.pushSpritesLayer();
+        spritesLayer.addSprites(textLayer.sprites().iterator());
         pushed = true;
     }
 
@@ -37,6 +37,7 @@ public class SpriteTextFacade implements TextFacade, Updatable {
     public void update() {
         textLayer.update();
         if (pushed && textLayer.isDismissed()) {
+            graphics.popLayer();
             graphics.popLayer();
             pushed = false;
         }

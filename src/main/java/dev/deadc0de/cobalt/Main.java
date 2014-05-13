@@ -4,10 +4,11 @@ import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.graphics.FixedSizeView;
+import dev.deadc0de.cobalt.graphics.GraphicsStack;
 import dev.deadc0de.cobalt.graphics.ImmutableView;
 import dev.deadc0de.cobalt.graphics.MovableView;
 import dev.deadc0de.cobalt.graphics.SpritesRepository;
-import dev.deadc0de.cobalt.graphics.javafx.JavaFXRenderingStack;
+import dev.deadc0de.cobalt.graphics.javafx.JavaFXGraphicsStack;
 import dev.deadc0de.cobalt.graphics.javafx.ImageSpritesRepository;
 import dev.deadc0de.cobalt.input.KeyboardInputFocusStack;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
@@ -44,17 +45,19 @@ public class Main extends Application {
     private final SpritesRepository<Image> spritesRepository = new ImageSpritesRepository();
     private final KeyboardInputFocusStack input;
     private final StackPane root = new StackPane();
-    private final JavaFXRenderingStack graphics;
+    private final JavaFXGraphicsStack graphics;
     private final SpriteTextFacade textFacade;
     private final World world;
 
     public Main() {
         input = inputFacade();
         updateHandlers.add(input);
-        graphics = new JavaFXRenderingStack(root.getChildren(), spritesRepository);
-        textFacade = new SpriteTextFacade(graphics, new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)), input);
+        graphics = new JavaFXGraphicsStack(root.getChildren(), spritesRepository);
+        final GraphicsStack.Frame worldFrame = graphics.pushFrame(view);
+        final GraphicsStack.Frame textFrame = graphics.pushFrame(new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)));
+        textFacade = new SpriteTextFacade(textFrame, input);
         updateHandlers.add(textFacade);
-        world = new World(textFacade, spritesRepository, graphics, input, VIEW_RELATIVE_POSITION, view);
+        world = new World(textFacade, spritesRepository, worldFrame, input, VIEW_RELATIVE_POSITION, view);
         final int initialRow = 9;
         final int initialColumn = 8;
         final Point initialPosition = new Point(initialColumn * TILE_SIZE, initialRow * TILE_SIZE - 4);
