@@ -137,8 +137,9 @@ public class PalletTownFactory implements ZoneFactory {
         }
 
         @Override
-        public void onSelected(Direction toward) {
+        public boolean onSelected(Direction toward) {
             textFacade.print(messages);
+            return INTERRUPT_ACTION;
         }
     }
 
@@ -156,8 +157,9 @@ public class PalletTownFactory implements ZoneFactory {
         }
 
         @Override
-        public void onSelected(Direction toward) {
+        public boolean onSelected(Direction toward) {
             action.run();
+            return INTERRUPT_ACTION;
         }
     }
 }

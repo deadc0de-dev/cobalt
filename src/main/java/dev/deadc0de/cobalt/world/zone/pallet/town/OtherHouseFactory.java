@@ -73,8 +73,9 @@ public class OtherHouseFactory implements ZoneFactory {
         }
 
         @Override
-        public void onSelected(Direction toward) {
+        public boolean onSelected(Direction toward) {
             zoneChanger.changeZone("pallet-town", PALLET_TOWN_ROW, PALLET_TOWN_COLUMN, PALLET_TOWN_POSITION);
+            return INTERRUPT_ACTION;
         }
     }
 }

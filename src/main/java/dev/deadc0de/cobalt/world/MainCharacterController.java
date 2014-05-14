@@ -24,27 +24,37 @@ public class MainCharacterController implements Updatable {
     @Override
     public void update() {
         if (mainCharacter.isIdle()) {
-            final Set<ZoneInput> activeInput = input.get();
-            if (activeInput.contains(ZoneInput.ACTION)) {
-                getNearCell(mainCharacter.currentDirection()).onSelected(mainCharacter.currentDirection());
+            applyInput(input.get());
+            mainCharacter.update();
+            return;
+        } else {
+            mainCharacter.update();
+        }
+        final boolean mainCharacterBecameIdle = mainCharacter.isIdle();
+        if (mainCharacterBecameIdle) {
+            getNearCell(lastDirection.opposite()).onLeave(lastDirection);
+            environment.getCellAt(row, column).onEnter(lastDirection);
+        }
+    }
+
+    public void applyInput(Set<ZoneInput> activeInput) {
+        if (activeInput.contains(ZoneInput.ACTION)) {
+            if (!getNearCell(mainCharacter.currentDirection()).onSelected(mainCharacter.currentDirection())) {
                 lastDirection = null;
-            } else if (activeInput.contains(ZoneInput.UP)) {
-                tryMove(Direction.UP, row - 1, column);
-                lastDirection = Direction.UP;
-            } else if (activeInput.contains(ZoneInput.DOWN)) {
-                tryMove(Direction.DOWN, row + 1, column);
-                lastDirection = Direction.DOWN;
-            } else if (activeInput.contains(ZoneInput.LEFT)) {
-                tryMove(Direction.LEFT, row, column - 1);
-                lastDirection = Direction.LEFT;
-            } else if (activeInput.contains(ZoneInput.RIGHT)) {
-                tryMove(Direction.RIGHT, row, column + 1);
-                lastDirection = Direction.RIGHT;
-            } else {
-                lastDirection = null;
+                return;
             }
         }
-        mainCharacter.update();
+        if (activeInput.contains(ZoneInput.UP)) {
+            tryMove(Direction.UP, row - 1, column);
+        } else if (activeInput.contains(ZoneInput.DOWN)) {
+            tryMove(Direction.DOWN, row + 1, column);
+        } else if (activeInput.contains(ZoneInput.LEFT)) {
+            tryMove(Direction.LEFT, row, column - 1);
+        } else if (activeInput.contains(ZoneInput.RIGHT)) {
+            tryMove(Direction.RIGHT, row, column + 1);
+        } else {
+            lastDirection = null;
+        }
     }
 
     private Cell getNearCell(Direction direction) {
@@ -65,6 +75,15 @@ public class MainCharacterController implements Updatable {
     private void tryMove(Direction direction, int targetRow, int targetColumn) {
         if (lastDirection == null) {
             mainCharacter.turn(direction);
+            lastDirection = direction;
+            return;
+        }
+        if (!environment.getCellAt(row, column).beforeLeave(direction)) {
+            lastDirection = null;
+            return;
+        }
+        if (!getNearCell(direction).beforeEnter(direction)) {
+            lastDirection = null;
             return;
         }
         if (environment.getCellAt(targetRow, targetColumn).isTraversable()) {
