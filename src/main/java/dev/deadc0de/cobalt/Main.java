@@ -10,6 +10,7 @@ import dev.deadc0de.cobalt.graphics.MovableView;
 import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import dev.deadc0de.cobalt.graphics.javafx.JavaFXGraphicsStack;
 import dev.deadc0de.cobalt.graphics.javafx.ImageSpritesRepository;
+import dev.deadc0de.cobalt.graphics.javafx.TwoBitColorImageFilter;
 import dev.deadc0de.cobalt.input.KeyboardInputFocusStack;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
 import dev.deadc0de.cobalt.text.TextInput;
@@ -42,7 +43,7 @@ public class Main extends Application {
 
     private final List<Updatable> updateHandlers = new ArrayList<>();
     private final MovableView view = new FixedSizeView(RENDERING_AREA);
-    private final SpritesRepository<Image> spritesRepository = new ImageSpritesRepository();
+    private final SpritesRepository<Image> spritesRepository = new ImageSpritesRepository(new TwoBitColorImageFilter(Color.grayRgb(0x40), Color.grayRgb(0x80), Color.grayRgb(0xC0)));
     private final KeyboardInputFocusStack input;
     private final StackPane root = new StackPane();
     private final JavaFXGraphicsStack graphics;
