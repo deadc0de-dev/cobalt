@@ -20,7 +20,7 @@ public class OtherHouseFactory implements ZoneFactory {
     private static final int TILE_SIZE = 16;
     private static final String NAME = "pallet-town-other-house";
     private static final String BACKGROUND_NAME = "pallet-town-other-house-background";
-    private static final int PALLET_TOWN_ROW = 9;
+    private static final int PALLET_TOWN_ROW = 8;
     private static final int PALLET_TOWN_COLUMN = 16;
     private static final Point PALLET_TOWN_POSITION = new Point(PALLET_TOWN_COLUMN * TILE_SIZE, PALLET_TOWN_ROW * TILE_SIZE - 4);
 
@@ -73,9 +73,9 @@ public class OtherHouseFactory implements ZoneFactory {
         }
 
         @Override
-        public boolean onSelected(Direction toward) {
+        public boolean beforeEnter(Direction toward) {
             zoneChanger.changeZone("pallet-town", PALLET_TOWN_ROW, PALLET_TOWN_COLUMN, PALLET_TOWN_POSITION);
-            return INTERRUPT_ACTION;
+            return CONTINUE_ACTION;
         }
     }
 }

@@ -81,7 +81,7 @@ public class PalletTownFactory implements ZoneFactory {
         final Cell obstacle = Cell.traversable(false);
         final Cell water = Cell.traversable(false);
         final Cell signboard = new MessageCell(textFacade, "Under\ndevelopment:\nplease retry\nlater.");
-        final Cell otherHouseDoor = new ActionCell(() -> zoneChanger.changeZone("pallet-town-other-house", OTHER_HOUSE_ROW, OTHER_HOUSE_COLUMN, OTHER_HOUSE_POSITION));
+        final Cell otherHouseDoor = new Door(zoneChanger, "pallet-town-other-house", OTHER_HOUSE_ROW, OTHER_HOUSE_COLUMN, OTHER_HOUSE_POSITION);
         final Cell labDoor = new MessageCell(textFacade, "It's locked.", "There's a note on\nthe door:\n32.5°N...", "The rest is torn\naway.");
         final Cell homeDoor = new MessageCell(textFacade, "It's locked.", "Mom...");
         fillRegion(enviroment, ground, new Region(new Point(0, 0), new Dimension(27, 24)));
@@ -143,23 +143,30 @@ public class PalletTownFactory implements ZoneFactory {
         }
     }
 
-    private static class ActionCell implements Cell {
+    private static class Door implements Cell {
 
-        private final Runnable action;
+        private final ZoneChanger zoneChanger;
+        private final String zone;
+        private final int row;
+        private final int column;
+        private final Point position;
 
-        public ActionCell(Runnable action) {
-            this.action = action;
+        public Door(ZoneChanger zoneChanger, String zone, int row, int column, Point position) {
+            this.zoneChanger = zoneChanger;
+            this.zone = zone;
+            this.row = row;
+            this.column = column;
+            this.position = position;
         }
 
         @Override
         public boolean isTraversable() {
-            return false;
+            return true;
         }
 
         @Override
-        public boolean onSelected(Direction toward) {
-            action.run();
-            return INTERRUPT_ACTION;
+        public void onEnter(Direction toward) {
+            zoneChanger.changeZone(zone, row, column, position);
         }
     }
 }

@@ -22,7 +22,7 @@ public class World implements ZoneChanger, Updatable {
     private final GraphicsStack.Frame graphics;
     private final InputFocusStack input;
     private final MutableSprite mainCharacterSprite;
-    private final MainCharacterElement mainCharacterElement;
+    private final MainCharacterController mainCharacterController;
     private final Point viewRelativePosition;
     private final MovableView view;
     private Zone currentZone;
@@ -33,7 +33,7 @@ public class World implements ZoneChanger, Updatable {
         this.graphics = graphics;
         this.input = input;
         mainCharacterSprite = new MutableSprite(null, null);
-        mainCharacterElement = new MainCharacterElement(mainCharacterSprite::setState, this::onCharacterMoved);
+        mainCharacterController = new MainCharacterController(new MainCharacterElement(mainCharacterSprite::setState, this::onCharacterMoved));
         this.viewRelativePosition = viewRelativePosition;
         this.view = view;
         loadZones(textFacade, spritesRepository);
@@ -59,7 +59,8 @@ public class World implements ZoneChanger, Updatable {
         }
         currentZone = zones.get(name);
         updatePosition(mainCharacterPosition);
-        final MainCharacterController mainCharacterController = createMainCharacterController(currentZone.environment, row, column);
+        final Supplier<Set<ZoneInput>> activeInputProvider = input.pushFocus(ZoneInput.class, () -> EnumSet.noneOf(ZoneInput.class));
+        mainCharacterController.changeEnvironment(activeInputProvider, currentZone.environment, row, column);
         graphics.pushSingleSourceLayer(currentZone.backgroundName);
         final SpritesLayer environmentSpritesLayer = graphics.pushSpritesLayer();
         environmentSpritesLayer.addSprites(currentZone.spritesSource.get().iterator());
@@ -83,12 +84,6 @@ public class World implements ZoneChanger, Updatable {
     private void updatePosition(Point mainCharacterPosition) {
         mainCharacterSprite.setPosition(mainCharacterPosition);
         view.relocate(mainCharacterPosition.x + viewRelativePosition.x, mainCharacterPosition.y + viewRelativePosition.y);
-    }
-
-    private MainCharacterController createMainCharacterController(ZoneEnvironment environment, int row, int column) {
-        final Supplier<Set<ZoneInput>> activeInputProvider = input.pushFocus(ZoneInput.class, () -> EnumSet.noneOf(ZoneInput.class));
-        final MainCharacterController controller = new MainCharacterController(mainCharacterElement, activeInputProvider, environment, row, column);
-        return controller;
     }
 
     @Override

@@ -7,18 +7,21 @@ import java.util.function.Supplier;
 public class MainCharacterController implements Updatable {
 
     private final MainCharacterElement mainCharacter;
-    private final Supplier<Set<ZoneInput>> input;
-    private final ZoneEnvironment environment;
+    private Supplier<Set<ZoneInput>> input;
+    private ZoneEnvironment environment;
     private int row;
     private int column;
     private Direction lastDirection;
 
-    public MainCharacterController(MainCharacterElement mainCharacter, Supplier<Set<ZoneInput>> input, ZoneEnvironment environment, int initialRow, int initialColumn) {
+    public MainCharacterController(MainCharacterElement mainCharacter) {
         this.mainCharacter = mainCharacter;
+    }
+
+    public void changeEnvironment(Supplier<Set<ZoneInput>> input, ZoneEnvironment environment, int row, int column) {
         this.input = input;
         this.environment = environment;
-        this.row = initialRow;
-        this.column = initialColumn;
+        this.row = row;
+        this.column = column;
     }
 
     @Override
@@ -45,15 +48,38 @@ public class MainCharacterController implements Updatable {
             }
         }
         if (activeInput.contains(ZoneInput.UP)) {
-            tryMove(Direction.UP, row - 1, column);
+            tryMove(Direction.UP, -1, 0);
         } else if (activeInput.contains(ZoneInput.DOWN)) {
-            tryMove(Direction.DOWN, row + 1, column);
+            tryMove(Direction.DOWN, 1, 0);
         } else if (activeInput.contains(ZoneInput.LEFT)) {
-            tryMove(Direction.LEFT, row, column - 1);
+            tryMove(Direction.LEFT, 0, -1);
         } else if (activeInput.contains(ZoneInput.RIGHT)) {
-            tryMove(Direction.RIGHT, row, column + 1);
+            tryMove(Direction.RIGHT, 0, 1);
         } else {
             lastDirection = null;
+        }
+    }
+
+    private void tryMove(Direction direction, int rowDelta, int columnDelta) {
+        if (lastDirection == null) {
+            mainCharacter.turn(direction);
+            lastDirection = direction;
+            return;
+        }
+        if (!environment.getCellAt(row, column).beforeLeave(direction)) {
+            lastDirection = null;
+            return;
+        }
+        if (!getNearCell(direction).beforeEnter(direction)) {
+            lastDirection = null;
+            return;
+        }
+        if (getNearCell(direction).isTraversable()) {
+            mainCharacter.move(direction);
+            row += rowDelta;
+            column += columnDelta;
+        } else {
+            mainCharacter.hit(direction);
         }
     }
 
@@ -69,29 +95,6 @@ public class MainCharacterController implements Updatable {
                 return environment.getCellAt(row, column + 1);
             default:
                 throw new IllegalStateException("unknown direction");
-        }
-    }
-
-    private void tryMove(Direction direction, int targetRow, int targetColumn) {
-        if (lastDirection == null) {
-            mainCharacter.turn(direction);
-            lastDirection = direction;
-            return;
-        }
-        if (!environment.getCellAt(row, column).beforeLeave(direction)) {
-            lastDirection = null;
-            return;
-        }
-        if (!getNearCell(direction).beforeEnter(direction)) {
-            lastDirection = null;
-            return;
-        }
-        if (environment.getCellAt(targetRow, targetColumn).isTraversable()) {
-            mainCharacter.move(direction);
-            row = targetRow;
-            column = targetColumn;
-        } else {
-            mainCharacter.hit(direction);
         }
     }
 }
