@@ -4,9 +4,7 @@ import dev.deadc0de.cobalt.Updatable;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.graphics.Sprite;
 import dev.deadc0de.cobalt.graphics.StationarySprite;
-import dev.deadc0de.cobalt.input.InputFocusStack;
 import java.util.Arrays;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -20,11 +18,10 @@ public class SpriteTextController implements Updatable {
     private static final String NEW_LINE = "\n";
     private static final int SCROLL_BLINK_DURATION = 16;
 
-    private final InputFocusStack input;
+    private final Supplier<Set<TextInput>> input;
     private final String[][] lines;
     private final Sprite[][] sprites;
     private final StringBuilder buffer;
-    private Supplier<Set<TextInput>> activeInput;
     private int currentLine;
     private int currentIndex;
     private int printingDelay;
@@ -32,7 +29,7 @@ public class SpriteTextController implements Updatable {
     private State state;
     private Runnable onEnd;
 
-    public SpriteTextController(InputFocusStack input) {
+    public SpriteTextController(Supplier<Set<TextInput>> input) {
         this.input = input;
         this.lines = new String[2][18];
         this.sprites = new Sprite[lines.length][];
@@ -59,25 +56,18 @@ public class SpriteTextController implements Updatable {
         }
     }
 
-    public void print(Iterator<String> messages) {
-        chainPrintCalls(messages, this::dismiss);
-    }
-
-    private void chainPrintCalls(Iterator<String> messages, Runnable onEnd) {
+    public void print(Iterator<String> messages, Runnable onEnd) {
         if (messages.hasNext()) {
             final String message = messages.next();
             if (messages.hasNext()) {
-                print(message, () -> this.chainPrintCalls(messages, onEnd));
+                print(message, () -> this.print(messages, onEnd));
             } else {
-                print(message, onEnd);
+                print(message, () -> dismiss(onEnd));
             }
         }
     }
 
     private void print(String message, Runnable onEnd) {
-        if (state == State.DISMISSED) {
-            activeInput = input.pushFocus(TextInput.class, () -> EnumSet.noneOf(TextInput.class));
-        }
         if (state == State.DISMISSED || state == State.ENDED) {
             state = State.PRINTING;
             clear();
@@ -90,13 +80,13 @@ public class SpriteTextController implements Updatable {
         }
     }
 
-    private void dismiss() {
-        input.popFocus();
-        state = State.DISMISSED;
-    }
-
     public boolean isDismissed() {
         return state == State.DISMISSED;
+    }
+
+    private void dismiss(Runnable onEnd) {
+        onEnd.run();
+        state = State.DISMISSED;
     }
 
     @Override
@@ -108,7 +98,7 @@ public class SpriteTextController implements Updatable {
                 onEnd.run();
                 return;
             case READY_TO_ADVANCE:
-                if (activeInput.get().contains(TextInput.FORWARD)) {
+                if (input.get().contains(TextInput.FORWARD)) {
                     if (buffer.length() == 0) {
                         state = State.ENDED;
                         return;
@@ -117,7 +107,7 @@ public class SpriteTextController implements Updatable {
                 }
             case WAITING_TO_ADVANCE:
                 updateBlinkingScroll();
-                if (activeInput.get().isEmpty()) {
+                if (input.get().isEmpty()) {
                     state = State.READY_TO_ADVANCE;
                 }
                 return;
@@ -158,7 +148,7 @@ public class SpriteTextController implements Updatable {
         }
         buffer.deleteCharAt(0);
         lines[currentLine][currentIndex++] = letter;
-        state = activeInput.get().isEmpty() ? State.PRINTING : State.FAST_PRINTING;
+        state = input.get().isEmpty() ? State.PRINTING : State.FAST_PRINTING;
     }
 
     private void lineFeed() {
