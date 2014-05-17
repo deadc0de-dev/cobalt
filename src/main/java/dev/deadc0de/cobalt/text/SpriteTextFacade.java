@@ -1,6 +1,7 @@
 package dev.deadc0de.cobalt.text;
 
 import dev.deadc0de.cobalt.Updatable;
+import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.graphics.GraphicsStack;
 import dev.deadc0de.cobalt.graphics.SpritesLayer;
 import dev.deadc0de.cobalt.input.InputFocusStack;
@@ -38,6 +39,26 @@ public class SpriteTextFacade implements TextFacade, Updatable {
     private void popTextLayer() {
         input.popFocus();
         graphics.popLayer();
+        graphics.popLayer();
+    }
+
+    @Override
+    public void showMenu(Runnable onMenuClose, int textWidth, Point position, Iterator<MenuEntry> menuEntries) {
+        final SpriteMenuController controller = new SpriteMenuController(input.pushFocus(MenuInput.class, () -> EnumSet.noneOf(MenuInput.class)), textWidth, position, menuEntries, dismissMenu(onMenuClose));
+        final SpritesLayer spritesLayer = graphics.pushSpritesLayer();
+        spritesLayer.addSprites(controller.sprites().iterator());
+        updateStack.push(controller);
+    }
+
+    private Runnable dismissMenu(Runnable onMenuClose) {
+        return () -> {
+            popMenu();
+            onMenuClose.run();
+        };
+    }
+
+    private void popMenu() {
+        input.popFocus();
         graphics.popLayer();
     }
 

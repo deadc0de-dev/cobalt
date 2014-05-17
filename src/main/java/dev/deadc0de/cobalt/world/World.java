@@ -8,6 +8,8 @@ import dev.deadc0de.cobalt.graphics.GraphicsStack;
 import dev.deadc0de.cobalt.graphics.SpritesLayer;
 import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import dev.deadc0de.cobalt.input.InputFocusStack;
+import dev.deadc0de.cobalt.text.MenuEntry;
+import dev.deadc0de.cobalt.text.MenuFacade;
 import dev.deadc0de.cobalt.text.TextFacade;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -21,6 +23,7 @@ public class World implements ZoneChanger, Updatable {
     private final Map<String, Zone> zones;
     private final GraphicsStack.Frame graphics;
     private final InputFocusStack input;
+    private final TextFacade textFacade;
     private final MutableSprite mainCharacterSprite;
     private final MainCharacterController mainCharacterController;
     private final Point viewRelativePosition;
@@ -32,8 +35,9 @@ public class World implements ZoneChanger, Updatable {
         zones = new HashMap<>();
         this.graphics = graphics;
         this.input = input;
+        this.textFacade = textFacade;
         mainCharacterSprite = new MutableSprite(null, null);
-        mainCharacterController = new MainCharacterController(new MainCharacterElement(mainCharacterSprite::setState, this::onCharacterMoved));
+        mainCharacterController = new MainCharacterController(new MainCharacterElement(mainCharacterSprite::setState, this::onCharacterMoved), this::showPauseMenu);
         this.viewRelativePosition = viewRelativePosition;
         this.view = view;
         loadZones(textFacade, spritesRepository);
@@ -42,6 +46,10 @@ public class World implements ZoneChanger, Updatable {
     private void onCharacterMoved(int dx, int dy) {
         mainCharacterSprite.setPosition(mainCharacterSprite.position().add(new Point(dx, dy)));
         view.move(dx, dy);
+    }
+
+    private void showPauseMenu(Runnable onMenuClose) {
+        textFacade.showMenu(onMenuClose, 7, new Point(56, 0), new Exit());
     }
 
     private void loadZones(TextFacade textFacade, SpritesRepository<?> spritesRepository) {
@@ -89,5 +97,18 @@ public class World implements ZoneChanger, Updatable {
     @Override
     public void update() {
         currentUpdatable.update();
+    }
+
+    private static class Exit implements MenuEntry {
+
+        @Override
+        public String label() {
+            return "EXIT";
+        }
+
+        @Override
+        public void onSelected(MenuFacade menuFacade) {
+            System.exit(0);
+        }
     }
 }

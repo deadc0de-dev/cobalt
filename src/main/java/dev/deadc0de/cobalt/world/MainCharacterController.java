@@ -2,19 +2,24 @@ package dev.deadc0de.cobalt.world;
 
 import dev.deadc0de.cobalt.Updatable;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class MainCharacterController implements Updatable {
 
     private final MainCharacterElement mainCharacter;
+    private final Consumer<Runnable> onPaused;
     private Supplier<Set<ZoneInput>> input;
     private ZoneEnvironment environment;
     private int row;
     private int column;
     private Direction lastDirection;
+    private boolean goingToPause;
+    private boolean paused;
 
-    public MainCharacterController(MainCharacterElement mainCharacter) {
+    public MainCharacterController(MainCharacterElement mainCharacter, Consumer<Runnable> onPaused) {
         this.mainCharacter = mainCharacter;
+        this.onPaused = onPaused;
     }
 
     public void changeEnvironment(Supplier<Set<ZoneInput>> input, ZoneEnvironment environment, int row, int column) {
@@ -22,12 +27,27 @@ public class MainCharacterController implements Updatable {
         this.environment = environment;
         this.row = row;
         this.column = column;
+        goingToPause = false;
+        paused = false;
     }
 
     @Override
     public void update() {
+        if (paused) {
+            return;
+        }
+        if (goingToPause && mainCharacter.isIdle()) {
+            goingToPause = false;
+            paused = true;
+            onPaused.accept(this::resume);
+            return;
+        }
+        final Set<ZoneInput> activeInput = input.get();
+        if (activeInput.contains(ZoneInput.PAUSE)) {
+            goingToPause = true;
+        }
         if (mainCharacter.isIdle()) {
-            applyInput(input.get());
+            applyInput(activeInput);
             mainCharacter.update();
             return;
         } else {
@@ -38,6 +58,10 @@ public class MainCharacterController implements Updatable {
             getNearCell(lastDirection.opposite()).onLeave(lastDirection);
             environment.getCellAt(row, column).onEnter(lastDirection);
         }
+    }
+
+    private void resume() {
+        paused = false;
     }
 
     public void applyInput(Set<ZoneInput> activeInput) {

@@ -100,5 +100,13 @@ public class Text {
         spritesRepository.addSprite("°", SOURCE_NAME, new Region(new Point(160, 16), new Dimension(8, 8)));
         spritesRepository.addSprite("&", SOURCE_NAME, new Region(new Point(168, 16), new Dimension(8, 8)));
         spritesRepository.addSprite(" ", SOURCE_NAME, new Region(new Point(248, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-top-left", SOURCE_NAME, new Region(new Point(0, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-top-right", SOURCE_NAME, new Region(new Point(8, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-bottom-left", SOURCE_NAME, new Region(new Point(16, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-bottom-right", SOURCE_NAME, new Region(new Point(24, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-top", SOURCE_NAME, new Region(new Point(32, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-bottom", SOURCE_NAME, new Region(new Point(40, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-left", SOURCE_NAME, new Region(new Point(48, 24), new Dimension(8, 8)));
+        spritesRepository.addSprite("frame-right", SOURCE_NAME, new Region(new Point(56, 24), new Dimension(8, 8)));
     }
 }

@@ -12,6 +12,7 @@ import dev.deadc0de.cobalt.graphics.javafx.JavaFXGraphicsStack;
 import dev.deadc0de.cobalt.graphics.javafx.ImageSpritesRepository;
 import dev.deadc0de.cobalt.graphics.javafx.TwoBitColorImageFilter;
 import dev.deadc0de.cobalt.input.KeyboardInputFocusStack;
+import dev.deadc0de.cobalt.text.MenuInput;
 import dev.deadc0de.cobalt.text.SpriteTextFacade;
 import dev.deadc0de.cobalt.text.TextInput;
 import dev.deadc0de.cobalt.world.World;
@@ -88,6 +89,7 @@ public class Main extends Application {
         final Map<Class<?>, Map<KeyCode, ?>> inputBindings = new HashMap<>();
         inputBindings.put(ZoneInput.class, zoneInput());
         inputBindings.put(TextInput.class, textInput());
+        inputBindings.put(MenuInput.class, menuInput());
         return new KeyboardInputFocusStack(inputBindings);
     }
 
@@ -108,6 +110,15 @@ public class Main extends Application {
         final Map<KeyCode, TextInput> bindings = new EnumMap<>(KeyCode.class);
         bindings.put(KeyCode.K, TextInput.FORWARD);
         bindings.put(KeyCode.M, TextInput.FORWARD);
+        return bindings;
+    }
+
+    private Map<KeyCode, MenuInput> menuInput() {
+        final Map<KeyCode, MenuInput> bindings = new EnumMap<>(KeyCode.class);
+        bindings.put(KeyCode.W, MenuInput.UP);
+        bindings.put(KeyCode.S, MenuInput.DOWN);
+        bindings.put(KeyCode.K, MenuInput.SELECT);
+        bindings.put(KeyCode.M, MenuInput.CANCEL);
         return bindings;
     }
 
