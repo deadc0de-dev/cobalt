@@ -17,4 +17,8 @@ public class Region {
         this.position = position;
         this.size = size;
     }
+
+    public Region(int x, int y, int width, int height) {
+        this(new Point(x, y), new Dimension(width, height));
+    }
 }

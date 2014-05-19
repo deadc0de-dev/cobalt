@@ -1,6 +1,5 @@
 package dev.deadc0de.cobalt.world.zone.pallet.town;
 
-import dev.deadc0de.cobalt.geometry.Dimension;
 import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.graphics.SpritesRepository;
@@ -39,15 +38,15 @@ public class OtherHouseFactory implements ZoneFactory {
         final Cell ground = Cell.traversable(true);
         final Cell obstacle = Cell.traversable(false);
         final Cell exit = new Exit(zoneChanger);
-        fillRegion(enviroment, obstacle, new Region(new Point(0, 0), new Dimension(8, 1)));
-        fillRegion(enviroment, ground, new Region(new Point(0, 1), new Dimension(8, 7)));
-        fillRegion(enviroment, obstacle, new Region(new Point(0, 8), new Dimension(8, 1)));
-        fillRegion(enviroment, obstacle, new Region(new Point(0, 1), new Dimension(2, 1)));
-        fillRegion(enviroment, obstacle, new Region(new Point(7, 1), new Dimension(1, 1)));
-        fillRegion(enviroment, obstacle, new Region(new Point(3, 3), new Dimension(2, 2)));
-        fillRegion(enviroment, obstacle, new Region(new Point(0, 6), new Dimension(1, 2)));
-        fillRegion(enviroment, obstacle, new Region(new Point(7, 6), new Dimension(1, 2)));
-        fillRegion(enviroment, exit, new Region(new Point(2, 8), new Dimension(2, 1)));
+        fillRegion(enviroment, obstacle, new Region(0, 0, 8, 1));
+        fillRegion(enviroment, ground, new Region(0, 1, 8, 7));
+        fillRegion(enviroment, obstacle, new Region(0, 8, 8, 1));
+        fillRegion(enviroment, obstacle, new Region(0, 1, 2, 1));
+        fillRegion(enviroment, obstacle, new Region(7, 1, 1, 1));
+        fillRegion(enviroment, obstacle, new Region(3, 3, 2, 2));
+        fillRegion(enviroment, obstacle, new Region(0, 6, 1, 2));
+        fillRegion(enviroment, obstacle, new Region(7, 6, 1, 2));
+        fillRegion(enviroment, exit, new Region(2, 8, 2, 1));
         return new ZoneEnvironment(enviroment, obstacle);
     }
 

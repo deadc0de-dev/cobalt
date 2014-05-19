@@ -2,8 +2,6 @@ package dev.deadc0de.cobalt;
 
 import dev.deadc0de.cobalt.animation.AnimationBuilder;
 import dev.deadc0de.cobalt.animation.LoopAnimation;
-import dev.deadc0de.cobalt.geometry.Dimension;
-import dev.deadc0de.cobalt.geometry.Point;
 import dev.deadc0de.cobalt.geometry.Region;
 import dev.deadc0de.cobalt.graphics.SpritesRepository;
 import java.util.function.Consumer;
@@ -16,16 +14,16 @@ public class Sprites {
 
     public static void addSprites(SpritesRepository<?> spritesRepository) {
         spritesRepository.addSource(SOURCE_NAME, SPRITES_SOURCE);
-        spritesRepository.addSprite("flower-1", SOURCE_NAME, new Region(new Point(64, 72), new Dimension(8, 8)));
-        spritesRepository.addSprite("flower-2", SOURCE_NAME, new Region(new Point(64, 88), new Dimension(8, 8)));
-        spritesRepository.addSprite("flower-3", SOURCE_NAME, new Region(new Point(64, 104), new Dimension(8, 8)));
-        spritesRepository.addSprite("flower-4", SOURCE_NAME, new Region(new Point(64, 120), new Dimension(8, 8)));
-        spritesRepository.addSprite("sea-1", SOURCE_NAME, new Region(new Point(16, 0), new Dimension(16, 16)));
-        spritesRepository.addSprite("sea-2", SOURCE_NAME, new Region(new Point(32, 0), new Dimension(16, 16)));
-        spritesRepository.addSprite("sea-3", SOURCE_NAME, new Region(new Point(48, 0), new Dimension(16, 16)));
-        spritesRepository.addSprite("sea-4", SOURCE_NAME, new Region(new Point(64, 0), new Dimension(16, 16)));
-        spritesRepository.addSprite("sea-5", SOURCE_NAME, new Region(new Point(80, 0), new Dimension(16, 16)));
-        spritesRepository.addSprite("rock", SOURCE_NAME, new Region(new Point(256, 64), new Dimension(16, 16)));
+        spritesRepository.addSprite("flower-1", SOURCE_NAME, new Region(64, 72, 8, 8));
+        spritesRepository.addSprite("flower-2", SOURCE_NAME, new Region(64, 88, 8, 8));
+        spritesRepository.addSprite("flower-3", SOURCE_NAME, new Region(64, 104, 8, 8));
+        spritesRepository.addSprite("flower-4", SOURCE_NAME, new Region(64, 120, 8, 8));
+        spritesRepository.addSprite("sea-1", SOURCE_NAME, new Region(16, 0, 16, 16));
+        spritesRepository.addSprite("sea-2", SOURCE_NAME, new Region(32, 0, 16, 16));
+        spritesRepository.addSprite("sea-3", SOURCE_NAME, new Region(48, 0, 16, 16));
+        spritesRepository.addSprite("sea-4", SOURCE_NAME, new Region(64, 0, 16, 16));
+        spritesRepository.addSprite("sea-5", SOURCE_NAME, new Region(80, 0, 16, 16));
+        spritesRepository.addSprite("rock", SOURCE_NAME, new Region(256, 64, 16, 16));
     }
 
     public static Iterable<Runnable> flower(Consumer<String> stateTracker) {
