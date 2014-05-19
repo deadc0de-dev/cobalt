@@ -56,7 +56,7 @@ public class Main extends Application {
         updateHandlers.add(input);
         graphics = new JavaFXGraphicsStack(root.getChildren(), spritesRepository);
         final GraphicsStack.Frame worldFrame = graphics.pushFrame(view);
-        final GraphicsStack.Frame textFrame = graphics.pushFrame(new ImmutableView(new Region(new Point(0, 0), RENDERING_AREA)));
+        final GraphicsStack.Frame textFrame = graphics.pushFrame(new ImmutableView(new Region(Point.zero(), RENDERING_AREA)));
         textFacade = new SpriteTextFacade(textFrame, input);
         updateHandlers.add(textFacade);
         world = new World(textFacade, spritesRepository, worldFrame, input, VIEW_RELATIVE_POSITION, view);

@@ -13,7 +13,7 @@ public interface GraphicsStack {
         void pushSingleSourceLayer(String sourceName, Point position);
 
         default void pushSingleSourceLayer(String sourceName) {
-            pushSingleSourceLayer(sourceName, Point.atOrigin());
+            pushSingleSourceLayer(sourceName, Point.zero());
         }
 
         SpritesLayer pushSpritesLayer();

@@ -13,7 +13,7 @@ public interface TextFacade {
     void print(Iterator<String> messages);
 
     default void showMenu(Runnable onMenuClose, int textWidth, MenuEntry... menuEntries) {
-        showMenu(onMenuClose, textWidth, new Point(0, 0), menuEntries);
+        showMenu(onMenuClose, textWidth, Point.zero(), menuEntries);
     }
 
     default void showMenu(Runnable onMenuClose, int textWidth, Point position, MenuEntry... menuEntries) {
